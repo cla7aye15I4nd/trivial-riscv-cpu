@@ -8,7 +8,7 @@ module ram
 (
   input  wire                   clk_in,   // system clock
   input  wire                   en_in,    // chip enable
-  input  wire                   r_nw_in,  // read/write select (read: 1, write: 0)
+  input  wire                   r_nw_in,  // read/write select (read: 0, write: 1)
   input  wire  [ADDR_WIDTH-1:0] a_in,     // memory address
   input  wire  [ 7:0]           d_in,     // data input
   output wire  [ 7:0]           d_out     // data output
