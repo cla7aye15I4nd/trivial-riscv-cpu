@@ -52,11 +52,17 @@
 /* other */
 `define OP_LUI      8'b0101_0000
 `define OP_AUIPC    8'b0101_0001
-`define OP_JAL      8'b0101_0010
-`define OP_JALR     8'b0101_0011
+`define OP_JAL      8'b1001_0010
+`define OP_JALR     8'b1001_0011
 
 /* Exception */
 `define OP_INVALID  8'b0000_0000
 `define OP_NOP      8'b1111_1111
+
+/* Register tag */
+`define REG_TAG_WIDTH   4     
+`define EXE_CNT         16
+`define regtag_t        [`REG_TAG_WIDTH - 1: 0]
+`define UNLOCKED        4'b1111
 
 `endif
