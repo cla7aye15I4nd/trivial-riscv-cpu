@@ -24,7 +24,7 @@
 /* R-type Instructions (0010) */
 `define R_TYPE      7'b0110011
 `define OP_ADD      8'b0010_0000
-`define OP_ADD      8'b0010_0001 // special mask
+`define OP_SUB      8'b0010_0001 // special mask
 `define OP_SLT      8'b0010_0010
 `define OP_SLTU     8'b0010_0100
 `define OP_XOR      8'b0010_0110
@@ -60,9 +60,37 @@
 `define OP_NOP      8'b1111_1111
 
 /* Register tag */
-`define REG_TAG_WIDTH   4     
-`define EXE_CNT         16
+`define ALU_CNT         2
+`define BRANCH_CNT      1
+`define LS_CNT          1
+
+`define ALU_MASTER      3'b000
+`define ALU_SALVER      3'b001
+`define BRANCH_SEL      3'b100
+`define LOAD_STORE      3'b101
+
+`define REG_TAG_WIDTH   3     
+`define EXE_CNT         8
 `define regtag_t        [`REG_TAG_WIDTH - 1: 0]
-`define UNLOCKED        4'b1111
+`define UNLOCKED        3'b111
+
+/* alu instruction */
+`define sinst_t     [3 : 0]
+`define ADD         4'b0000
+`define SUB         4'b0001
+`define SLT         4'b0010
+`define SLTU        4'b0100
+`define XOR         4'b0110
+`define OR          4'b1000
+`define AND         4'b1010
+`define SLL         4'b1100
+`define SRL         4'b1110
+`define SRA         4'b1111
+
+/* useful marco */
+`define UPDATE_SIGNAL(en, tag, data)    \
+    input wire en,                      \
+    input wire `regtag_t tag,           \
+    input wire `word_t data,
 
 `endif
