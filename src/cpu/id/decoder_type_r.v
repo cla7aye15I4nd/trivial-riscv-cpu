@@ -1,16 +1,13 @@
-`include "../../common_defs.vh"
-`include "../cpu_defs.vh"
-
 module decoder_type_r (
     input  wire `inst_t     inst,
 
     output reg `oper_t      op,
-    output wire `regaddr_t   reg_read_addr0,
-    output wire `regaddr_t   reg_read_addr1,
+    output wire `regaddr_t   reg_read_addrx,
+    output wire `regaddr_t   reg_read_addry,
     output wire `regaddr_t   reg_write_addr
 );
-assign reg_read_addr0 = inst[19 : 15];
-assign reg_read_addr1 = inst[24 : 20];
+assign reg_read_addrx = inst[19 : 15];
+assign reg_read_addry = inst[24 : 20];
 assign reg_write_addr = inst[11 : 7];
 
 always @(*) begin

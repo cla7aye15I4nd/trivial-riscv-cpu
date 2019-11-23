@@ -1,6 +1,3 @@
-`include "../../common_defs.vh"
-`include "../cpu_defs.vh"
-
 `define Inst(_op, _imm) \
 begin                   \
     op = _op;           \
