@@ -125,9 +125,9 @@ reg_stat reg_stat_instance(
   .en_rw0(en_w0), .addrw0(reg_write_addr0), .lockw0(write_lock0),
   .en_rw1(en_w1), .addrw1(reg_write_addr1), .lockw1(write_lock1),
 
-  .en_w0(reg_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
-  .en_w1(reg_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
-  .en_w2(reg_enw2), .reg_write_addr2(regs_waddr2), .write_data2(regs_wdata2),
+  .en_w0(regs_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
+  .en_w1(regs_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
+  .en_w2(regs_enw2), .reg_write_addr2(regs_waddr2), .write_data2(regs_wdata2),
 
   .en_mod0(alloc_en_mw0), .en_mod1(alloc_en_mw1), 
   .reg_addr0(alloc_maddr0), .reg_addr1(alloc_maddr1),
@@ -204,17 +204,17 @@ rs_alu rs_alu_instance(
   .tagx1(alloc_tagx1), .tagy1(alloc_tagy1), .tagw1(alloc_tagw1),
   .datax1(alloc_datax1), .datay1(alloc_datay1), .addrw1(alloc_addrw1),
 
-  .busy_alu0(), .alu_tag0(), .alu_data0(),
-  .busy_alu1(), .alu_tag1(), .alu_data1(),
+  .busy_alu0(alu0_busy_upd), .alu_tag0(alu0_tagw_upd), .alu_data0(regs_wdata0),
+  .busy_alu1(alu1_busy_upd), .alu_tag1(alu1_tagw_upd), .alu_data1(regs_wdata1),
   .busy_ls(), .ls_tag(), .ls_data(),
 
-  .alu_busy0_out(), .alu_op0_out(),
-  .alu_tagx0_out(), .alu_tagy0_out(), .alu_tagw0_out(),
-  .alu_datax0_out(), .alu_datay0_out(), .alu_target0_out(),
+  .alu_busy0_out(alu0_busy_in), .alu_op0_out(alu0_op_in),
+  .alu_tagx0_out(alu0_tagx_in), .alu_tagy0_out(alu0_tagy_in), .alu_tagw0_out(alu0_tagw_in),
+  .alu_datax0_out(alu0_datax_in), .alu_datay0_out(alu0_datay_in), .alu_target0_out(alu0_target_in),
 
-  .alu_busy1_out(), .alu_op1_out(),
-  .alu_tagx1_out(), .alu_tagy1_out(), .alu_tagw1_out(),
-  .alu_datax1_out(), .alu_datay1_out(), .alu_target1_out(),
+  .alu_busy1_out(alu1_busy_in), .alu_op1_out(alu1_op_in),
+  .alu_tagx1_out(alu1_tagx_in), .alu_tagy1_out(alu1_tagy_in), .alu_tagw1_out(alu1_tagw_in),
+  .alu_datax1_out(alu1_datax_in), .alu_datay1_out(alu1_datay_in), .alu_target1_out(alu1_target_in),
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
@@ -229,7 +229,21 @@ ex_alu ex_alu_master(
   .alu_tagy_out(alu0_tagy_upd), 
   .alu_tagw_out(alu0_tagw_upd),
 
-  .en(reg_enw0), .target_out(regs_waddr0), .data_out(regs_wdata0)
+  .en(regs_enw0), .target_out(regs_waddr0), .data_out(regs_wdata0)
+);
+
+
+ex_alu ex_alu_salver(
+  .alu_busy_in(alu1_busy_in), .alu_op_in(alu1_op_in),
+  .alu_tagx_in(alu1_tagx_in), .alu_tagy_in(alu1_tagy_in), .alu_tagw_in(alu1_tagw_in),
+  .alu_datax_in(alu1_datax_in), .alu_datay_in(alu1_datay_in), .alu_target_in(alu1_target_in),
+
+  .alu_busy_out(alu1_busy_upd),
+  .alu_tagx_out(alu1_tagx_upd), 
+  .alu_tagy_out(alu1_tagy_upd), 
+  .alu_tagw_out(alu1_tagw_upd),
+
+  .en(regs_enw1), .target_out(regs_waddr1), .data_out(regs_wdata1)
 );
 
 endmodule
