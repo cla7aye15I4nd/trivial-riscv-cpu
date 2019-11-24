@@ -23,11 +23,12 @@ module cpu_if(
 
 reg `addr_t pcx, pcy;
 
-assign en_rx = 1;
-assign en_ry = 1;
+assign en_rx_out = 1;
+assign en_ry_out = 1;
 assign pcx_out = pcx;
 assign pcy_out = pcy;
 
+`define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
 always @(posedge clk) begin
     if (rst) begin
         pcx <= 0;
@@ -37,18 +38,20 @@ always @(posedge clk) begin
         pc1_out <= pcy;
         if (hitx) begin
             hitx_out  <= 1;
-            instx_out <= instx;
+            instx_out <= `REV(instx);
             if (hity) begin
                 hity_out  <= 1;
-                insty_out <= insty;
+                insty_out <= `REV(insty);
                 pcx <= pcx + 8;
                 pcy <= pcy + 8;
             end else begin
                 hity_out  <= 0;
+                insty_out <= `ZERO_WORD;
                 pcx <= pcx + 4;
                 pcy <= pcy + 4;
             end
         end else begin
+            instx_out <= `ZERO_WORD;
             hitx_out <= 0;
             hity_out <= 0;
         end

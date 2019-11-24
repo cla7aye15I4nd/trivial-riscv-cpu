@@ -39,6 +39,7 @@ always @(*) begin
         `SRL  : data_out = alu_datax_in          >>  alu_datay_in[4 : 0];
         `SRA  : data_out = $signed(alu_datax_in) >>> alu_datay_in[4 : 0];
         `OR   : data_out = $signed(alu_datax_in) |   $signed(alu_datay_in);
+        `LUI  : data_out = alu_datax_in;
         endcase
     end
 end

@@ -21,9 +21,9 @@
 
 `define REG_OUTPUT(_en_r, _reg_read_addr, _data, _lock) \
 if (_en_r) begin                                        \
-    _lock <= `FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr];                                                        \
-    _data <= (`FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr]) == `UNLOCKED ? data[_reg_read_addr]: _reg_read_addr;  \ 
-end
+    _lock = `FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr];                                                        \
+    _data = (`FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr]) == `UNLOCKED ? data[_reg_read_addr]: _reg_read_addr;  \ 
+end 
 
 `define REG_WRITE(_en_w, _reg_write_addr, _data)    \
 if (_en_w) begin                                    \
@@ -71,32 +71,36 @@ reg `word_t data[0 : `REG_COUNT-1];
 reg `regtag_t lock[0 : `REG_COUNT-1];
 integer i;
 
+always @(*) begin
+    if(rdy) begin
+        `REG_OUTPUT(en_rx0, reg_read_addrx0, read_datax0, lockx0) else {read_datax0, lockx0} = {imm0, `UNLOCKED};
+        `REG_OUTPUT(en_ry0, reg_read_addry0, read_datay0, locky0) else {read_datay0, locky0} = {`ZERO_WORD, `UNLOCKED};
+        `REG_OUTPUT(en_rx1, reg_read_addrx1, read_datax1, lockx1) else {read_datax1, lockx1} = {imm1, `UNLOCKED};
+        `REG_OUTPUT(en_ry1, reg_read_addry1, read_datay1, locky1) else {read_datay1, locky1} = {`ZERO_WORD, `UNLOCKED};
+
+        if (en_rw0) begin
+            lockw0 = `FROM_WRITE(addrw0) : lock[addrw0];
+        end
+        if (en_rw1) begin
+            lockw1 = `FROM_WRITE(addrw1) : lock[addrw1];
+        end
+    end
+end
+
 always @(posedge clk) begin
     if (rst) begin
         for (i = 0; i < `REG_COUNT; i = i + 1) begin
-            data[i] <= `ZERO_WORD;
-            lock[i] <= `UNLOCKED;
+            data[i] = `ZERO_WORD;
+            lock[i] = `UNLOCKED;
         end
-    end else if(rdy) begin
-        `REG_OUTPUT(en_rx0, reg_read_addrx0, read_datax0, lockx0) else read_datax0 <= imm0;
-        `REG_OUTPUT(en_ry0, reg_read_addry0, read_datay0, locky0)
-        `REG_OUTPUT(en_rx1, reg_read_addrx1, read_datax1, lockx1) else read_datax1 <= imm1;
-        `REG_OUTPUT(en_ry1, reg_read_addry1, read_datay1, locky1)
-
-        if (en_rw0) begin
-            lockw0 <= `FROM_WRITE(addrw0) : lock[addrw0];
-        end
-        if (en_rw1) begin
-            lockw1 <= `FROM_WRITE(addrw1) : lock[addrw1];
-        end
-        
+    end else begin
         `REG_TAG_WRITE(en_mod0, reg_addr0, reg_tag0)
         `REG_TAG_WRITE(en_mod1, reg_addr1, reg_tag1)
     end
 end
 
 always @(negedge clk) begin
-    if (rdy) begin
+    if (rdy && rst == 0) begin
         `REG_WRITE(en_w0, reg_write_addr0, write_data0)
         `REG_WRITE(en_w1, reg_write_addr1, write_data1)
         `REG_WRITE(en_w2, reg_write_addr2, write_data2)

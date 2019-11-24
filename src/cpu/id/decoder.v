@@ -34,6 +34,7 @@ wire `word_t imm_i, imm_s, imm_b;
 wire `regaddr_t reg_read_addrx_r, reg_read_addrx_s, reg_read_addrx_b;
 wire `regaddr_t reg_read_addry_i, reg_read_addry_r, reg_read_addry_s, reg_read_addry_b;
 wire `regaddr_t reg_write_addr_i, reg_write_addr_r;
+
 decoder_type_i decoder_type_i_instance(
     .inst(inst),
 
@@ -120,7 +121,7 @@ always @(posedge clk) begin
                 end
                 7'b0010111: begin //AUIPC
                     op <= `OP_LUI;
-                    imm <= $signed(inst[31 : 12]);
+                    imm <= {inst[31 : 12], {12{1'b0}}};
                     reg_write_addr <= inst[11 : 7];
                     `SET_SIGNAL(0, 0, 1);
                 end

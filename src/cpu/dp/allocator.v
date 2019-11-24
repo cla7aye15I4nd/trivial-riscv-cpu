@@ -85,11 +85,11 @@ always @(negedge clk) begin
                                 && alu0_tagw_in == `UNLOCKED)) begin
                 alu0_en_out     <= 1;
                 alu0_op_out     <= op0[3 : 0];
-                alu0_tagx_out   <= en_rx0 ? read_lockx0: `UNLOCKED;
-                alu0_datax_out  <= en_rx0 ? read_datax0: `ZERO_WORD;
+                alu0_tagx_out   <= read_lockx0; // must exist
+                alu0_datax_out  <= read_datax0;
                 alu0_tagy_out   <= en_ry0 ? read_locky0: `UNLOCKED;
                 alu0_datay_out  <= en_ry0 ? read_datay0: `ZERO_WORD;
-                alu0_tagw_out   <= en_w0  ? write_lock0: `UNLOCKED;
+                alu0_tagw_out   <= write_lock0; // must exist
                 alu0_addrw_out  <= write_addr0;
                 en_mw0 <= 1;
                 maddr0 <= write_addr0;
@@ -97,6 +97,11 @@ always @(negedge clk) begin
             end
         end
         endcase
+    end else begin
+        en_mw0 <= 0;
+        en_mw1 <= 0;
+        alu0_en_out <= 0;
+        alu1_en_out <= 0;
     end
 end
 
