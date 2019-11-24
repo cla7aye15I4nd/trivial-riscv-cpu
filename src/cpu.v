@@ -75,12 +75,14 @@ wire en_w0, en_w1;
 wire `regaddr_t reg_read_addrx0, reg_read_addrx1;
 wire `regaddr_t reg_read_addry0, reg_read_addry1;
 wire `regaddr_t reg_write_addr0, reg_write_addr1;
+wire `addr_t alloc_pc0, alloc_pc1;
 
 // Decoder
 decoder decoder_master(
-  .clk(clk_in), .rdy(rdy_in), //.stall()
+  .clk(clk_in), .rdy(rdy_in), 
   .hit(if_hit0), .pc(if_pc0), .inst(if_inst0),
 
+  .pc_out(alloc_pc0),
   .op(op0), .imm(imm0), 
   .en_rx(en_rx0), .en_ry(en_ry0), .en_w(en_w0),
   .reg_read_addrx(reg_read_addrx0), 
@@ -92,6 +94,7 @@ decoder decoder_salve(
   .clk(clk_in), .rdy(rdy_in), //.stall()
   .hit(if_hit1), .pc(if_pc1), .inst(if_inst1),
 
+  .pc_out(alloc_pc1),
   .op(op1), .imm(imm1), 
   .en_rx(en_rx1), .en_ry(en_ry1), .en_w(en_w1),
   .reg_read_addrx(reg_read_addrx1), 
@@ -137,6 +140,7 @@ reg_stat reg_stat_instance(
 );
 
 // Allocator
+wire `addr_t alu0_pc_out, alu1_pc_out;
 wire alloc_en0, alloc_en1;
 wire`sinst_t alloc_op0, alloc_op1;
 wire `regtag_t alloc_tagx0, alloc_tagx1;
@@ -152,6 +156,7 @@ wire `regtag_t alu0_tagx_upd, alu0_tagy_upd, alu0_tagw_upd;
 wire `regtag_t alu1_tagx_upd, alu1_tagy_upd, alu1_tagw_upd;
 
 allocator allocator_instance(
+  .pc0_in(alloc_pc0), .pc1_in(alloc_pc1),
   .op0(op0), .en_rx0(en_rx0), .en_ry0(en_ry0), .en_w0(en_w0),
   .read_lockx0(read_lockx0), .read_locky0(read_locky0),
   .read_datax0(read_datax0), .read_datay0(read_datay0),
@@ -171,10 +176,12 @@ allocator allocator_instance(
   .alu0_busy(alu0_busy_upd), .alu0_tagx_in(alu0_tagx_upd), .alu0_tagy_in(alu0_tagy_upd), .alu0_tagw_in(alu0_tagw_upd), 
   .alu1_busy(alu1_busy_upd), .alu1_tagx_in(alu1_tagx_upd), .alu1_tagy_in(alu1_tagy_upd), .alu1_tagw_in(alu1_tagw_upd),
 
+  .alu0_pc_out(alu0_pc_out), 
   .alu0_en_out(alloc_en0), .alu0_op_out(alloc_op0), 
   .alu0_tagx_out(alloc_tagx0), .alu0_tagy_out(alloc_tagy0), .alu0_tagw_out(alloc_tagw0),
   .alu0_datax_out(alloc_datax0), .alu0_datay_out(alloc_datay0), .alu0_addrw_out(alloc_addrw0),
 
+  .alu1_pc_out(alu1_pc_out), 
   .alu1_en_out(alloc_en1), .alu1_op_out(alloc_op1), 
   .alu1_tagx_out(alloc_tagx1), .alu1_tagy_out(alloc_tagy1), .alu1_tagw_out(alloc_tagw1),
   .alu1_datax_out(alloc_datax1), .alu1_datay_out(alloc_datay1), .alu1_addrw_out(alloc_addrw1),
@@ -220,6 +227,7 @@ rs_alu rs_alu_instance(
 );
 
 ex_alu ex_alu_master(
+  .pc_in(alu0_pc_out),
   .alu_busy_in(alu0_busy_in), .alu_op_in(alu0_op_in),
   .alu_tagx_in(alu0_tagx_in), .alu_tagy_in(alu0_tagy_in), .alu_tagw_in(alu0_tagw_in),
   .alu_datax_in(alu0_datax_in), .alu_datay_in(alu0_datay_in), .alu_target_in(alu0_target_in),
@@ -234,6 +242,7 @@ ex_alu ex_alu_master(
 
 
 ex_alu ex_alu_salver(
+  .pc_in(alu1_pc_out),
   .alu_busy_in(alu1_busy_in), .alu_op_in(alu1_op_in),
   .alu_tagx_in(alu1_tagx_in), .alu_tagy_in(alu1_tagy_in), .alu_tagw_in(alu1_tagw_in),
   .alu_datax_in(alu1_datax_in), .alu_datay_in(alu1_datay_in), .alu_target_in(alu1_target_in),

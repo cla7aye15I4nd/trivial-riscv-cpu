@@ -1,4 +1,5 @@
 module ex_alu(
+    input wire `addr_t pc_in,
     input wire alu_busy_in,
     input wire `sinst_t alu_op_in,
     input wire `regtag_t alu_tagx_in,
@@ -40,6 +41,7 @@ always @(*) begin
         `SRA  : data_out = $signed(alu_datax_in) >>> alu_datay_in[4 : 0];
         `OR   : data_out = $signed(alu_datax_in) |   $signed(alu_datay_in);
         `LUI  : data_out = alu_datax_in;
+        `AUIPC: data_out = alu_datax_in + pc_in;
         endcase
     end
 end

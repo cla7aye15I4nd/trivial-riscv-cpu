@@ -18,6 +18,9 @@
     output reg `regtag_t tag,               
 
 module allocator(
+    input wire `addr_t pc0_in,
+    input wire `addr_t pc1_in,
+
     `INST_PORT_DEF(
         op0, en_rx0, en_ry0, en_w0, 
         read_lockx0, read_locky0, 
@@ -45,6 +48,7 @@ module allocator(
     input wire `regtag_t alu1_tagy_in,
     input wire `regtag_t alu1_tagw_in,
 
+    output reg `addr_t alu0_pc_out,
     output reg alu0_en_out,
     output reg `sinst_t alu0_op_out,
     output reg `regtag_t alu0_tagx_out,
@@ -54,6 +58,7 @@ module allocator(
     output reg `word_t alu0_datay_out,
     output reg `addr_t alu0_addrw_out,
 
+    output wire `addr_t alu1_pc_out,
     output reg alu1_en_out,
     output reg `sinst_t alu1_op_out,
     output reg `regtag_t alu1_tagx_out,
@@ -91,6 +96,7 @@ always @(negedge clk) begin
                 alu0_datay_out  <= en_ry0 ? read_datay0: `ZERO_WORD;
                 alu0_tagw_out   <= write_lock0; // must exist
                 alu0_addrw_out  <= write_addr0;
+                alu0_pc_out     <= pc0_in;
                 en_mw0 <= 1;
                 maddr0 <= write_addr0;
                 mtag0  <= `ALU_MASTER;

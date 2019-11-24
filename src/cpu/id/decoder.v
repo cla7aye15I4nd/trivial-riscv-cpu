@@ -19,6 +19,7 @@ module decoder(
     input wire `addr_t pc,
     input wire `inst_t inst,
 
+    output reg `addr_t pc_out,
     output reg `oper_t op, 
     output reg `word_t imm,
     output reg en_rx,
@@ -72,6 +73,7 @@ decoder_type_b decoder_type_b_instance(
 );
 
 always @(posedge clk) begin
+    pc_out <= pc;
     if (rdy) begin
         if (hit == 0) begin
             op <= `OP_NOP;
@@ -115,19 +117,19 @@ always @(posedge clk) begin
                 end
                 7'b0110111: begin //LUI
                     op <= `OP_LUI;
-                    imm <= $signed(inst[31 : 12]);
+                    imm <= {inst[31 : 12], {12{1'b0}}};
                     reg_write_addr <= inst[11 : 7];
                     `SET_SIGNAL(0, 0, 1);
                 end
                 7'b0010111: begin //AUIPC
-                    op <= `OP_LUI;
+                    op <= `OP_AUIPC;
                     imm <= {inst[31 : 12], {12{1'b0}}};
                     reg_write_addr <= inst[11 : 7];
                     `SET_SIGNAL(0, 0, 1);
                 end
                 7'b1101111: begin //JAL
                     op <= `OP_JAL;
-                    imm <= $signed({inst[31 : 31], inst[19 : 12], inst[20 : 20], inst[30: 21]});
+                    imm <= $signed({inst[31 : 31], inst[19 : 12], inst[20 : 20], inst[30: 21], 1'b0});
                     reg_write_addr <= inst[11 : 7];
                     `SET_SIGNAL(0, 0, 1);
                 end

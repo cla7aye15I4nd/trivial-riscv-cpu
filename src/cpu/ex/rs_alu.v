@@ -1,5 +1,6 @@
 module rs_alu(
     // Allocator Input
+    input wire `addr_t pc0,
     input wire en0,
     input wire `sinst_t op0,
     input wire `regtag_t tagx0,
@@ -9,6 +10,7 @@ module rs_alu(
     input wire `word_t datay0,
     input wire `addr_t addrw0,
 
+    input wire `addr_t pc1,
     input wire en1,
     input wire `sinst_t op1,
     input wire `regtag_t tagx1,
@@ -32,6 +34,7 @@ module rs_alu(
     input wire `word_t ls_data,
 
     // Output to alu execuator
+    output wire pc0_out,
     output reg alu_busy0_out,
     output reg `sinst_t alu_op0_out,
     output reg `regtag_t alu_tagx0_out,
@@ -41,6 +44,7 @@ module rs_alu(
     output reg `word_t alu_datay0_out,
     output reg `regaddr_t alu_target0_out,
 
+    output wire pc1_out,
     output reg alu_busy1_out,
     output reg `sinst_t alu_op1_out,
     output reg `regtag_t alu_tagx1_out,
@@ -54,6 +58,9 @@ module rs_alu(
     input wire rdy,
     input wire rst
 );
+
+assign pc0_out = pc0;
+assign pc1_out = pc1;
 
 reg busy[0 : `ALU_CNT - 1];
 reg `sinst_t op[0 : `ALU_CNT - 1];
