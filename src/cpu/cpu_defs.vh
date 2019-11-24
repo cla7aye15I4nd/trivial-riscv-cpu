@@ -51,7 +51,7 @@
 
 /* other */
 `define OP_LUI      8'b0101_0111
-`define OP_AUIPC    8'b0101_0001
+`define OP_AUIPC    8'b0101_0011
 `define OP_JAL      8'b1001_0010
 `define OP_JALR     8'b1001_0011
 
@@ -87,6 +87,7 @@
 `define SRL         4'b1110
 `define SRA         4'b1111
 `define LUI         4'b0111
+`define AUIPC       4'b0011
 
 /* useful marco */
 `define UPDATE_SIGNAL(en, tag, data)    \
