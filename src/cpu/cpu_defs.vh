@@ -36,9 +36,9 @@
 
 /* S-type Instructions (0011) */
 `define S_TYPE      7'b0100011
-`define OP_SB       8'b0011_0000
-`define OP_SH       8'b0011_0001
-`define OP_SW       8'b0011_0010
+`define OP_SB       8'b0011_1101
+`define OP_SH       8'b0011_1110
+`define OP_SW       8'b0011_1111
 
 /* B-type Instructions (0100) */
 `define B_TYPE      7'b1100011
@@ -52,8 +52,8 @@
 /* other */
 `define OP_LUI      8'b0101_0111
 `define OP_AUIPC    8'b0101_0011
-`define OP_JAL      8'b1001_0010
-`define OP_JALR     8'b1001_0011
+`define OP_JAL      8'b1001_0101
+`define OP_JALR     8'b1001_1001
 
 /* Exception */
 `define OP_INVALID  8'b0000_0000
@@ -88,6 +88,18 @@
 `define SRA         4'b1111
 `define LUI         4'b0111
 `define AUIPC       4'b0011
+`define JAL         4'b0101
+`define JALR        4'b1001
+
+/* ls instrucion */
+`define LB          4'b0000
+`define LH          4'b0001
+`define LW          4'b0010
+`define LBU         4'b0011
+`define LHU         4'b0100
+`define SB          4'b1101
+`define SH          4'b1110
+`define SW          4'b1111
 
 /* useful marco */
 `define UPDATE_SIGNAL(en, tag, data)    \
