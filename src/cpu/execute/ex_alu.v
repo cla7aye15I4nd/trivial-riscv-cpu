@@ -5,8 +5,8 @@ module ex_alu(
     input wire `regtag_t alu_tagx_in,
     input wire `regtag_t alu_tagy_in,
     input wire `regtag_t alu_tagw_in,
-    input wire `dword_t alu_datax_in,
-    input wire `dword_t alu_datay_in,
+    input wire `word_t alu_datax_in,
+    input wire `word_t alu_datay_in,
     input wire `regaddr_t alu_target_in,
 
     // to alloctor
@@ -18,7 +18,7 @@ module ex_alu(
     // to regfile
     output wire en,
     output wire `regaddr_t target_out,
-    output reg `dword_t data_out,
+    output reg `word_t data_out,
 
     // to cpu if
     output reg en_jmp,
