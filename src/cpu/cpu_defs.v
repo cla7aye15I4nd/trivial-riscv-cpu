@@ -116,7 +116,7 @@
 `define UPDATE_SIGNAL(en, tag, data)    \
     input wire en,                      \
     input wire `regtag_t tag,           \
-    input wire `dword_t data,
+    input wire `word_t data,
 
 `define UPDATE_PAIR(_tag, _data, tag, data)                                                             \
     {_tag, _data} <= (busy_alu0 == 0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
