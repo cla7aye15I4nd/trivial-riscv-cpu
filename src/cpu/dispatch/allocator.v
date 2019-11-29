@@ -1,149 +1,225 @@
-`define INST_PORT_DEF(op, en_rx, en_ry, en_w, read_lockx, read_locky, read_datax, read_datay, read_addrx, read_addry, write_lock, write_addr)  \
-    input wire `oper_t op,              \
-    input wire en_rx,                   \
-    input wire en_ry,                   \
-    input wire en_w,                    \
-    input wire `regtag_t  read_lockx,   \
-    input wire `regtag_t  read_locky,   \
-    input wire `regtag_t  write_lock,   \
-    input wire `word_t read_datax,      \
-    input wire `word_t read_datay,      \
-    input wire `regaddr_t read_addrx,   \
-    input wire `regaddr_t read_addry,   \
-    input wire `regaddr_t write_addr,
-
-`define MODIFY_VAR_DEF(en_w, addr, tag)     \
-    output reg en_w,                        \
-    output reg `regaddr_t addr,             \
-    output reg `regtag_t tag,               
-
 module allocator(
-    input wire `addr_t pc0_in,
+    // Waiting alloc
+    input wire `oper_t op0_in,
     input wire `addr_t pc1_in,
+    input wire en_rx0_in, en_ry0_in, en_w0_in,
+    input wire `word_t imm0_in, datax0_in, datay0_in, 
+    input wire `regtag_t tagx0_in, tagy0_in, tagw0_in,
+    input wire `regaddr_t addrx0_in, addry0_in, addrw0_in,
 
-    `INST_PORT_DEF(
-        op0, en_rx0, en_ry0, en_w0, 
-        read_lockx0, read_locky0, 
-        read_datax0, read_datay0, 
-        read_addrx0, read_addry0, 
-        write_lock0, write_addr0)
-    `INST_PORT_DEF(
-        op1, en_rx1, en_ry1, en_w1, 
-        read_lockx1, read_locky1, 
-        read_datax1, read_datay1, 
-        read_addrx1, read_addry1, 
-        write_lock1, write_addr1)
+    input wire `oper_t op1_in,
+    input wire `addr_t pc0_in,
+    input wire en_rx1_in, en_ry1_in, en_w1_in,
+    input wire `word_t imm1_in, datax1_in, datay1_in, 
+    input wire `regtag_t tagx1_in, tagy1_in, tagw1_in,
+    input wire `regaddr_t addrx1_in, addry1_in, addrw1_in,
 
     // Update Reg State
-    `MODIFY_VAR_DEF(en_mw0, maddr0, mtag0)
-    `MODIFY_VAR_DEF(en_mw1, maddr1, mtag1)
+    output reg en_mw0, 
+    output reg `regtag_t mtag0,
+    output reg `regaddr_t maddr0,
     
-    input wire alu0_busy,
+    output reg en_mw1,
+    output reg `regtag_t mtag1,
+    output reg `regaddr_t maddr1,
+    
+    // current alu state
+    input wire alu0_busy_in,
     input wire `regtag_t alu0_tagx_in,
     input wire `regtag_t alu0_tagy_in,
     input wire `regtag_t alu0_tagw_in,
 
-    input wire alu1_busy,
+    input wire alu1_busy_in,
     input wire `regtag_t alu1_tagx_in,
     input wire `regtag_t alu1_tagy_in,
     input wire `regtag_t alu1_tagw_in,
 
-    input wire ls_busy,
+    input wire ls_busy_in,
     input wire `regtag_t ls_tagx_in,
     input wire `regtag_t ls_tagy_in,
     input wire `regtag_t ls_tagw_in,
 
-    output reg `addr_t alu0_pc_out,
+    input wire branch_busy_in,
+    input wire `regtag_t branch_tagx_in,
+    input wire `regtag_t branch_tagy_in,
+
+    // issue
     output reg alu0_en_out,
+    output reg `addr_t alu0_pc_out,
     output reg `sinst_t alu0_op_out,
     output reg `regtag_t alu0_tagx_out,
     output reg `regtag_t alu0_tagy_out,
     output reg `regtag_t alu0_tagw_out,
     output reg `word_t alu0_datax_out,
     output reg `word_t alu0_datay_out,
-    output reg `addr_t alu0_addrw_out,
+    output reg `regaddr_t alu0_addrw_out,
 
-    output wire `addr_t alu1_pc_out,
     output reg alu1_en_out,
+    output reg `addr_t alu1_pc_out,
     output reg `sinst_t alu1_op_out,
     output reg `regtag_t alu1_tagx_out,
     output reg `regtag_t alu1_tagy_out,
     output reg `regtag_t alu1_tagw_out,
     output reg `word_t alu1_datax_out,
     output reg `word_t alu1_datay_out,
-    output reg `addr_t alu1_addrw_out,
+    output reg `regaddr_t alu1_addrw_out,
 
     output reg ls_en_out,
     output reg `sinst_t ls_op_out,
+    output reg `word_t ls_offset_out,
     output reg `regtag_t ls_tagx_out,
     output reg `regtag_t ls_tagy_out,
     output reg `regtag_t ls_tagw_out,
     output reg `word_t ls_datax_out,
     output reg `word_t ls_datay_out,
-    output reg `addr_t ls_addrw_out,
+    output reg `regaddr_t ls_addrw_out,
 
-    input wire branch_busy,
+    output reg branch_en_out,
+    output reg `addr_t branch_pc_out,
+    output reg `word_t branch_offset_out,
+    output reg `sinst_t branch_op_out,
+    output reg `regtag_t branch_tagx_out,
+    output reg `regtag_t branch_tagy_out,
+    output reg `word_t branch_datax_out,
+    output reg `word_t branch_datay_out,
 
+    output reg issue0, issue1,
     input wire clk,
     input wire rst,
     input wire rdy
 );
 
-reg [0 : `ALU_CNT + `BRANCH_CNT + `LS_CNT - 1] busy;
+reg `oper_t op0;
+reg `addr_t pc0;
+reg en_rx0, en_ry0, en_w0;
+reg `word_t imm0, datax0, datay0;
+reg `regtag_t tagx0, tagy0, tagw0;
+reg `regaddr_t addrx0, addry0, addrw0;
 
-integer i;
+reg `oper_t op1;
+reg `addr_t pc1;
+reg en_rx1, en_ry1, en_w1;
+reg `word_t imm1, datax1, datay1;
+reg `regtag_t tagx1, tagy1, tagw1;
+reg `regaddr_t addrx1, addry1, addrw1;
 
 always @(negedge clk) begin
-    if (op0 != `OP_NOP) begin
-        case (op0[7 : 4])
-        4'b0001, 4'b0010, 4'b0101, 4'b1001: begin
-            if (alu0_busy == 0 || 
-                (alu0_busy == 1 && alu0_tagx_in == `UNLOCKED 
-                                && alu0_tagy_in == `UNLOCKED
-                                && alu0_tagw_in == `UNLOCKED)) begin
-                alu0_en_out     <= 1;
-                alu0_op_out     <= op0[3 : 0];
-                alu0_tagx_out   <= read_lockx0; // must exist
-                alu0_datax_out  <= read_datax0;
-                alu0_tagy_out   <= en_ry0 ? read_locky0: `UNLOCKED;
-                alu0_datay_out  <= en_ry0 ? read_datay0: `ZERO_WORD;
-                alu0_tagw_out   <= write_lock0; // must exist
-                alu0_addrw_out  <= write_addr0;
-                alu0_pc_out     <= pc0_in;
-                en_mw0 <= 1;
-                maddr0 <= write_addr0;
-                mtag0  <= `ALU_MASTER;
-            end
-        end
-        4'b0011, 4'b1001: begin
-            if (ls_busy == 0 ||
-                (ls_busy == 1 && ls_tagx_in == `UNLOCKED
-                              && ls_tagy_in == `UNLOCKED
-                              && ls_tagw_in == `UNLOCKED)) begin
-                ls_en_out     <= 1;
-                ls_op_out     <= op0[3 : 0];
-                ls_tagx_out   <= read_lockx0; // must exist
-                ls_datax_out  <= read_datax0;
-                ls_tagy_out   <= en_ry0 ? read_locky0: `UNLOCKED;
-                ls_datay_out  <= en_ry0 ? read_datay0: `ZERO_WORD;
-                ls_tagw_out   <= write_lock0; // must exist
-                ls_addrw_out  <= write_addr0;
-                en_mw0 <= op0[7 : 4] == 4'b1001 ? 1 : 0; // LOAD prefix
-                maddr0 <= write_addr0;
-                mtag0  <= `LOAD_STORE;
-            end
-        end
-        endcase
+    if (rst) begin
+        issue0 <= 1;
+        issue1 <= 1;
     end else begin
-        en_mw0 <= 0;
-        en_mw1 <= 0;
-        maddr0 <= `ZERO_WORD;
-        maddr1 <= `ZERO_WORD;
-        mtag0  <= `ZERO_WORD;
-        mtag1  <= `ZERO_WORD;
-        alu0_en_out <= 0;
-        alu1_en_out <= 0;
+        if (issue0) begin
+            op0 <= op0_in;
+            pc0 <= pc0_in;
+            {en_rx0, en_ry0, en_w0} <= {en_rx0_in, en_ry0_in, en_w0_in};
+            {imm0, datax0, datay0} <= {imm0_in, datax0_in, datay0_in};
+            {tagx0, tagy0, tagw0} <= {tagx0_in, tagy0_in, tagw0_in};
+            {addrx0, addry0, addrw0} <= {addrx0_in, addry0_in, addrw0_in};
+
+            if (issue1) begin 
+                op1 <= op1_in;
+                pc1 <= pc1_in;
+                {en_rx1, en_ry1, en_w1} <= {en_rx1_in, en_ry1_in, en_w1_in};
+                {imm1, datax1, datay1} <= {imm1_in, datax1_in, datay1_in};
+                {tagx1, tagy1, tagw1} <= {tagx1_in, tagy1_in, tagw1_in};
+                {addrx1, addry1, addrw1} <= {addrx1_in, addry1_in, addrw1_in};
+            end
+        end
     end
 end
 
+always @(*) begin
+    case (op0[7 : 4])
+    4'b0001, 4'b0010, 4'b0101, 4'b1101: begin
+        if (alu0_busy_in == 0 || {alu0_busy_in, alu0_tagx_in, alu0_tagy_in, alu0_tagw_in} == {1'b1, {3{`UNLOCKED}}}) begin
+            issue0          = 1;
+            alu0_op_out     = op0[3 : 0];
+            alu0_tagx_out   = tagx0; // must exist
+            alu0_datax_out  = datax0;
+            alu0_tagy_out   = en_ry0 ? tagy0: `UNLOCKED;
+            alu0_datay_out  = en_ry0 ? datay0: `ZERO;
+            alu0_tagw_out   = tagw0; // must exist
+            alu0_addrw_out  = addrw0;
+            alu0_pc_out     = pc0_in;
+            en_mw0          = 1;
+            maddr0          = addrw0;
+            mtag0           = `ALU_MASTER;
+        end else if (alu1_busy_in == 0 || {alu1_busy_in, alu1_tagx_in, alu1_tagy_in, alu1_tagw_in} == {1'b1, {3{`UNLOCKED}}}) begin
+            issue1          = 1;
+            alu1_op_out     = op0[3 : 0];
+            alu1_tagx_out   = tagx0; // must exist
+            alu1_datax_out  = datax0;
+            alu1_tagy_out   = en_ry0 ? tagy0: `UNLOCKED;
+            alu1_datay_out  = en_ry0 ? datay0: `ZERO;
+            alu1_tagw_out   = tagw0; // must exist
+            alu1_addrw_out  = addrw0;
+            alu1_pc_out     = pc0_in;
+            en_mw0          = 1;
+            maddr0          = addrw0;
+            mtag0           = `ALU_SALVER;
+        end else begin
+            issue0 = 0;
+            en_mw0 = 0;
+            mtag0  = `UNLOCKED;
+        end
+    end
+    4'b0011, 4'b1001: begin
+        if (ls_busy_in == 0) begin
+            issue0        = 1;
+            ls_op_out     = op0[3 : 0];
+            ls_offset_out = imm0;
+            ls_tagx_out   = tagx0; // must exist
+            ls_datax_out  = datax0;
+            ls_tagy_out   = en_ry0 ? tagy0: `UNLOCKED;
+            ls_datay_out  = datay0;
+            ls_tagw_out   = op0[7 : 4] == 4'b1001 ? tagw0 : `UNLOCKED;
+            ls_addrw_out  = addrw0;
+            en_mw0        = op0[7 : 4] == 4'b1001 ? 1 : 0; // LOAD prefix
+            maddr0        = addrw0;
+            mtag0         = `LOAD_STORE;
+        end else begin
+            issue0 = 0;
+            en_mw0 = 0;
+            mtag0  = `UNLOCKED;
+        end
+    end
+    4'b0100: begin 
+        if (branch_busy_in == 0 || {branch_busy_in, branch_tagx_in, branch_tagy_in} == {1'b1, {2{`UNLOCKED}}}) begin
+            issue0              = 1;
+            branch_op_out       = op0[3 : 0];
+            branch_offset_out   = imm0;
+            branch_tagx_out     = tagx0;
+            branch_datax_out    = datax0;
+            branch_tagy_out     = tagy0;
+            branch_datay_out    = datay0;
+            en_mw0              = 0;
+            mtag0               = `BRANCH_SEL;  
+        end else begin
+            issue0 = 0;
+            en_mw0 = 0;
+            mtag0  = `UNLOCKED;
+        end
+    end
+    4'b1111: begin
+        issue0 = 1;
+        en_mw0 = 0;
+        mtag0  = `UNLOCKED;
+    end
+    default: begin
+        issue0 = 0;
+        en_mw0 = 0;
+        mtag0  = `UNLOCKED;
+    end
+    endcase
+
+    alu0_en_out = mtag0 == `ALU_MASTER ? 1: 0;
+    alu1_en_out = mtag0 == `ALU_SALVER ? 1: 0;
+    ls_en_out   = mtag0 == `LOAD_STORE ? 1: 0;
+    branch_en_out=mtag0 == `BRANCH_SEL ? 1: 0;
+
+    /* must clean !!!!! */
+    en_mw1 = 0;
+    maddr1 = `ZERO;
+    mtag1  = `UNLOCKED;
+end
 endmodule // allocator
