@@ -6,8 +6,8 @@ module rs_alu(
     input wire `regtag_t tagx0,
     input wire `regtag_t tagy0,
     input wire `regtag_t tagw0,
-    input wire `word_t datax0,
-    input wire `word_t datay0,
+    input wire `dword_t datax0,
+    input wire `dword_t datay0,
     input wire `addr_t addrw0,
 
     input wire `addr_t pc1,
@@ -16,42 +16,39 @@ module rs_alu(
     input wire `regtag_t tagx1,
     input wire `regtag_t tagy1,
     input wire `regtag_t tagw1,
-    input wire `word_t datax1,
-    input wire `word_t datay1,
+    input wire `dword_t datax1,
+    input wire `dword_t datay1,
     input wire `addr_t addrw1,
 
     // Update signal from alu execuator
     input wire busy_alu0,
-    input wire `regtag_t alu_tag0,
-    input wire `word_t alu_data0,
+    input wire `dword_t alu_data0,
 
     input wire busy_alu1,
-    input wire `regtag_t alu_tag1,
-    input wire `word_t alu_data1,
+    input wire `dword_t alu_data1,
 
     input wire busy_ls,
-    input wire `regtag_t ls_tag,
-    input wire `word_t ls_data,
+    input wire `dword_t ls_data,
 
     // Output to alu execuator
-    output wire pc0_out,
+    output reg `addr_t pc0_out,
     output wire alu_busy0_out,
     output wire `sinst_t alu_op0_out,
     output wire `regtag_t alu_tagx0_out,
     output wire `regtag_t alu_tagy0_out,
     output wire `regtag_t alu_tagw0_out,
-    output wire `word_t alu_datax0_out,
-    output wire `word_t alu_datay0_out,
+    output wire `dword_t alu_datax0_out,
+    output wire `dword_t alu_datay0_out,
     output wire `regaddr_t alu_target0_out,
 
-    output wire pc1_out,
+    output reg `addr_t pc1_out,
     output wire alu_busy1_out,
     output wire `sinst_t alu_op1_out,
     output wire `regtag_t alu_tagx1_out,
     output wire `regtag_t alu_tagy1_out,
     output wire `regtag_t alu_tagw1_out,
-    output wire `word_t alu_datax1_out,
-    output wire `word_t alu_datay1_out,
+    output wire `dword_t alu_datax1_out,
+    output wire `dword_t alu_datay1_out,
     output wire `regaddr_t alu_target1_out,
 
     input wire clk,
@@ -59,16 +56,13 @@ module rs_alu(
     input wire rst
 );
 
-assign pc0_out = pc0;
-assign pc1_out = pc1;
-
 reg busy[0 : `ALU_CNT - 1];
 reg `sinst_t op[0 : `ALU_CNT - 1];
 reg `regtag_t tag_rx[0 : `ALU_CNT - 1];
 reg `regtag_t tag_ry[0 : `ALU_CNT - 1];
 reg `regtag_t tag_w[0 : `ALU_CNT - 1];
-reg `word_t data_rx[0 : `ALU_CNT - 1];
-reg `word_t data_ry[0 : `ALU_CNT - 1];
+reg `dword_t data_rx[0 : `ALU_CNT - 1];
+reg `dword_t data_ry[0 : `ALU_CNT - 1];
 reg `regaddr_t target[0 : `ALU_CNT - 1];
 
 assign alu_busy0_out = busy[0];
@@ -91,27 +85,17 @@ assign alu_target1_out = target[1];
 
 integer i;
 always @(posedge clk) begin
+    pc0_out <= en0 ? pc0: pc0_out;
+    pc1_out <= en1 ? pc1: pc1_out;
+end
+
+always @(negedge clk) begin
     if (rst) begin
         for (i = 0; i < `ALU_CNT; i = i + 1) begin
             {busy[i], op[i], data_rx[i], data_ry[i], target[i]} <= 0;
             {tag_rx[i], tag_ry[i], tag_w[i]} = {`UNLOCKED, `UNLOCKED, `UNLOCKED};
         end
-    end
-end
-
-`define UPDATE_PAIR(_tag, _data, tag, data)                                                             \
-    {_tag, _data} <= (busy_alu0 == 0 && tag == alu_tag0 && tag != `UNLOCKED) ? {`UNLOCKED, alu_data0} : \
-                     (busy_alu1 == 0 && tag == alu_tag1 && tag != `UNLOCKED) ? {`UNLOCKED, alu_data1} : \
-                     (busy_ls == 0 && tag == ls_tag && tag != `UNLOCKED) ? {`UNLOCKED, ls_data}       : \
-                     {tag, data};
-`define UPDATE_VAR(_tag, tag) \
-    _tag <= (busy_alu0 == 0 && tag == alu_tag0 && tag != `UNLOCKED) ? `UNLOCKED : \
-            (busy_alu1 == 0 && tag == alu_tag1 && tag != `UNLOCKED) ? `UNLOCKED : \
-            (busy_ls == 0 && tag == ls_tag && tag != `UNLOCKED) ? `UNLOCKED     : \
-            tag;
-            
-always @(negedge clk) begin
-    if (rst == 0 && rdy) begin
+    end else if (rst == 0 && rdy) begin
         /* Input instruction exist, update by input or origin value */
         if (en0) begin
             busy[0] <= 1;

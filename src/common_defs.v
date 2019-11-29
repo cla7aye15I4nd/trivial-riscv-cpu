@@ -1,7 +1,7 @@
 /* common datatype config */
 `define byte_t  [7 : 0]
-`define half_t  [15: 0]
-`define word_t  [31: 0]
+`define word_t  [15: 0]
+`define dword_t [31: 0]
 
 /* cpu data struct*/
 `define oper_t  [7 : 0]
@@ -20,5 +20,5 @@
 `define WRITE_SIGNAL    1'b1
 
 /* constant */
-`define ZERO_WORD 32'h00000000
+`define ZERO 32'h00000000
 `define NULL_PTR  17'b1111_1111_1111_1111_1

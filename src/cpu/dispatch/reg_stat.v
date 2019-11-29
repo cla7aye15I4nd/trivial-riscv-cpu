@@ -1,16 +1,13 @@
-`include "common_defs.vh"
-`include "cpu/cpu_defs.vh"
-
 `define READ_VAR_DEFINE(_en_r, _reg_read_addr, _data, _lock)\
     input wire _en_r,                                       \
     input wire `regaddr_t _reg_read_addr,                   \
-    output reg `word_t _data,                               \
+    output reg `dword_t _data,                               \
     output reg `regtag_t _lock,
 
 `define WRITE_VAR_DEFINE(_en_w, _reg_write_addr, _write_data)   \
     input wire _en_w,                                           \
     input wire `regaddr_t _reg_write_addr,                      \
-    input wire `word_t _write_data,
+    input wire `dword_t _write_data,
 
 `define WRITE_TAG_DEFINE(_en_w, _reg_write_addr, _write_data)   \
     input wire _en_w,                                           \
@@ -22,8 +19,7 @@
 `define REG_OUTPUT(_en_r, _reg_read_addr, _data, _lock) \
 if (_en_r) begin                                        \
     _lock = `FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr];                                                        \
-    _data = (`FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr]) == `UNLOCKED ? data[_reg_read_addr]: _reg_read_addr;  \ 
-end 
+    _data = (`FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr]) == `UNLOCKED ? data[_reg_read_addr]: _reg_read_addr;  end 
 
 `define REG_WRITE(_en_w, _reg_write_addr, _data)    \
 if (_en_w) begin                                    \
@@ -37,7 +33,7 @@ if (_en_w) begin                            \
 end
 
 module reg_stat(
-    input wire `word_t imm0, imm1,
+    input wire `dword_t imm0, imm1,
     `READ_VAR_DEFINE(en_rx0, reg_read_addrx0, read_datax0, lockx0)
     `READ_VAR_DEFINE(en_ry0, reg_read_addry0, read_datay0, locky0)
     `READ_VAR_DEFINE(en_rx1, reg_read_addrx1, read_datax1, lockx1)
@@ -67,16 +63,16 @@ module reg_stat(
     input wire rdy
 );
 
-reg `word_t data[0 : `REG_COUNT-1];
+reg `dword_t data[0 : `REG_COUNT-1];
 reg `regtag_t lock[0 : `REG_COUNT-1];
 integer i;
 
 always @(*) begin
     if(rst == 0 && rdy) begin
-        `REG_OUTPUT(en_rx0, reg_read_addrx0, read_datax0, lockx0) else {read_datax0, lockx0} = {imm0, `UNLOCKED};
-        `REG_OUTPUT(en_ry0, reg_read_addry0, read_datay0, locky0) else {read_datay0, locky0} = {`ZERO_WORD, `UNLOCKED};
-        `REG_OUTPUT(en_rx1, reg_read_addrx1, read_datax1, lockx1) else {read_datax1, lockx1} = {imm1, `UNLOCKED};
-        `REG_OUTPUT(en_ry1, reg_read_addry1, read_datay1, locky1) else {read_datay1, locky1} = {`ZERO_WORD, `UNLOCKED};
+        `REG_OUTPUT(en_rx0, reg_read_addrx0, read_datax0, lockx0) else begin {read_datax0, lockx0} = {imm0, `UNLOCKED}; end
+        `REG_OUTPUT(en_ry0, reg_read_addry0, read_datay0, locky0) else begin {read_datay0, locky0} = {`ZERO, `UNLOCKED}; end
+        `REG_OUTPUT(en_rx1, reg_read_addrx1, read_datax1, lockx1) else begin {read_datax1, lockx1} = {imm1, `UNLOCKED}; end
+        `REG_OUTPUT(en_ry1, reg_read_addry1, read_datay1, locky1) else begin {read_datay1, locky1} = {`ZERO, `UNLOCKED}; end
 
         if (en_rw0) begin
             lockw0 = `FROM_WRITE(addrw0) : lock[addrw0];
@@ -90,7 +86,7 @@ end
 always @(posedge clk) begin
     if (rst) begin
         for (i = 0; i < `REG_COUNT; i = i + 1) begin
-            data[i] <= `ZERO_WORD;
+            data[i] <= `ZERO;
             lock[i] <= `UNLOCKED;
         end
     end else begin

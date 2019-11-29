@@ -52,8 +52,8 @@
 /* other */
 `define OP_LUI      8'b0101_0111
 `define OP_AUIPC    8'b0101_0011
-`define OP_JAL      8'b1001_0101
-`define OP_JALR     8'b1001_1001
+`define OP_JAL      8'b1101_0101
+`define OP_JALR     8'b1101_1001
 
 /* Exception */
 `define OP_INVALID  8'b0000_0000
@@ -68,6 +68,7 @@
 `define ALU_SALVER      3'b001
 `define BRANCH_SEL      3'b100
 `define LOAD_STORE      3'b101
+`define FAIL            3'b111
 
 `define REG_TAG_WIDTH   3     
 `define EXE_CNT         8
@@ -91,6 +92,12 @@
 `define JAL         4'b0101
 `define JALR        4'b1001
 
+`define BEQ         4'b0000
+`define BNE         4'b0001
+`define BLT         4'b0010
+`define BGE         4'b0011
+`define BLTU        4'b0100
+`define BGEU        4'b0101
 /* ls instrucion */
 `define LB          4'b0000
 `define LH          4'b0001
@@ -101,10 +108,25 @@
 `define SH          4'b1110
 `define SW          4'b1111
 
+/* reorder buffer */
+`define COMMON_MODE 0
+`define JUMP_MODE   1
+
 /* useful marco */
 `define UPDATE_SIGNAL(en, tag, data)    \
     input wire en,                      \
     input wire `regtag_t tag,           \
-    input wire `word_t data,
+    input wire `dword_t data,
+
+`define UPDATE_PAIR(_tag, _data, tag, data)                                                             \
+    {_tag, _data} <= (busy_alu0 == 0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
+                     (busy_alu1 == 0 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
+                     (busy_ls == 0   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
+                     {tag, data};
+`define UPDATE_VAR(_tag, tag) \
+    _tag <= (busy_alu0 == 0 && tag == `ALU_MASTER) ? `UNLOCKED : \
+            (busy_alu1 == 0 && tag == `ALU_SALVER) ? `UNLOCKED : \
+            (busy_ls == 0 && tag == `LOAD_STORE) ? `UNLOCKED   : \
+            tag;
 
 `endif
