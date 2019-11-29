@@ -1,13 +1,13 @@
 `define READ_VAR_DEFINE(_en_r, _reg_read_addr, _data, _lock)\
     input wire _en_r,                                       \
     input wire `regaddr_t _reg_read_addr,                   \
-    output reg `dword_t _data,                               \
+    output reg `word_t _data,                               \
     output reg `regtag_t _lock,
 
 `define WRITE_VAR_DEFINE(_en_w, _reg_write_addr, _write_data)   \
     input wire _en_w,                                           \
     input wire `regaddr_t _reg_write_addr,                      \
-    input wire `dword_t _write_data,
+    input wire `word_t _write_data,
 
 `define WRITE_TAG_DEFINE(_en_w, _reg_write_addr, _write_data)   \
     input wire _en_w,                                           \
@@ -33,7 +33,7 @@ if (_en_w) begin                            \
 end
 
 module reg_stat(
-    input wire `dword_t imm0, imm1,
+    input wire `word_t imm0, imm1,
     `READ_VAR_DEFINE(en_rx0, reg_read_addrx0, read_datax0, lockx0)
     `READ_VAR_DEFINE(en_ry0, reg_read_addry0, read_datay0, locky0)
     `READ_VAR_DEFINE(en_rx1, reg_read_addrx1, read_datax1, lockx1)
@@ -63,7 +63,7 @@ module reg_stat(
     input wire rdy
 );
 
-reg `dword_t data[0 : `REG_COUNT-1];
+reg `word_t data[0 : `REG_COUNT-1];
 reg `regtag_t lock[0 : `REG_COUNT-1];
 integer i;
 

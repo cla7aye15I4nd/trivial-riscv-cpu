@@ -1,12 +1,12 @@
 module ex_branch(
     input wire `addr_t pc_in,
-    input wire `dword_t offset_in,
+    input wire `word_t offset_in,
     input wire branch_busy_in,
     input wire `sinst_t branch_op_in,
     input wire `regtag_t branch_tagx_in,
     input wire `regtag_t branch_tagy_in,
-    input wire `dword_t branch_datax_in,
-    input wire `dword_t branch_datay_in,
+    input wire `word_t branch_datax_in,
+    input wire `word_t branch_datay_in,
 
     // to alloctor
     output wire branch_busy_out,
@@ -15,7 +15,7 @@ module ex_branch(
     
     // to if
     output reg en,
-    output reg `dword_t dest_out,
+    output reg `word_t dest_out,
 
     input wire clk,
     input wire rdy

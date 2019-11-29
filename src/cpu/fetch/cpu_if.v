@@ -6,8 +6,8 @@ module cpu_if(
     // From Icache
     input wire hitx,
     input wire hity,
-    input wire `dword_t instx,
-    input wire `dword_t insty,
+    input wire `word_t instx,
+    input wire `word_t insty,
 
     // To Icache
     output wire en_rx_out,
@@ -27,8 +27,8 @@ module cpu_if(
     output reg `inst_t pc1_out,
     output reg hitx_out,
     output reg hity_out,
-    output reg `dword_t instx_out,
-    output reg `dword_t insty_out
+    output reg `word_t instx_out,
+    output reg `word_t insty_out
 );
 
 reg jmp_stall;

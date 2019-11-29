@@ -3,31 +3,31 @@ module rs_branch(
     input `addr_t pc,
     input wire en,
     input wire `sinst_t op,
-    input wire `dword_t imm,
+    input wire `word_t imm,
     input wire `regtag_t tagx,
     input wire `regtag_t tagy,
-    input wire `dword_t datax,
-    input wire `dword_t datay,
+    input wire `word_t datax,
+    input wire `word_t datay,
 
     // Update signal from alu execuator
     input wire busy_alu0,
-    input wire `dword_t alu_data0,
+    input wire `word_t alu_data0,
 
     input wire busy_alu1,
-    input wire `dword_t alu_data1,
+    input wire `word_t alu_data1,
 
     input wire busy_ls,
-    input wire `dword_t ls_data,
+    input wire `word_t ls_data,
 
     // To branch module
     output reg `addr_t pc_out,
-    output reg `dword_t branch_offset_out,
+    output reg `word_t branch_offset_out,
     output wire branch_busy_out,
     output wire `sinst_t branch_op_out,
     output wire `regtag_t branch_tagx_out,
     output wire `regtag_t branch_tagy_out,
-    output wire `dword_t branch_datax_out,
-    output wire `dword_t branch_datay_out,
+    output wire `word_t branch_datax_out,
+    output wire `word_t branch_datay_out,
 
     input wire clk,
     input wire rdy,
@@ -35,11 +35,11 @@ module rs_branch(
 );
 
 reg busy;
-reg `dword_t offset;
+reg `word_t offset;
 reg `sinst_t op_branch;
 reg `regaddr_t target;
 reg `regtag_t tag_rx, tag_ry, tag_w;
-reg `dword_t data_rx, data_ry;
+reg `word_t data_rx, data_ry;
 
 assign branch_busy_out = busy;
 assign branch_op_out = op_branch;
