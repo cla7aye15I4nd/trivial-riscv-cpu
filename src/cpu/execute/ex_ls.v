@@ -1,12 +1,12 @@
 module ex_ls(
-    input wire `dword_t offset_in,
+    input wire `word_t offset_in,
     input wire ls_busy_in,
     input wire `sinst_t ls_op_in,
     input wire `regtag_t ls_tagx_in,
     input wire `regtag_t ls_tagy_in,
     input wire `regtag_t ls_tagw_in,
-    input wire `dword_t ls_datax_in,
-    input wire `dword_t ls_datay_in,
+    input wire `word_t ls_datax_in,
+    input wire `word_t ls_datay_in,
     input wire `regaddr_t ls_target_in,
 
     // to alloctor
@@ -18,14 +18,14 @@ module ex_ls(
     // to regfile
     output reg en,
     output wire `regaddr_t target_out,
-    output reg `dword_t data_out,
+    output reg `word_t data_out,
 
     // to cache
     output reg en_ls,
     output reg r_nw_out,
     output reg `addr_t ls_addr,
     output reg `byte_t ls_size,
-    output reg `dword_t ls_data_out,
+    output reg `word_t ls_data_out,
 
     // from cache
     input wire finish,

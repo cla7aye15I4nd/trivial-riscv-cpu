@@ -46,7 +46,7 @@ module cache
     input wire r_nw_in,
     input wire `addr_t ls_addr,
     input wire `byte_t ls_size,
-    input wire `dword_t ls_data_in,
+    input wire `word_t ls_data_in,
 
     output reg finish,
     output reg `word_t ls_data_out,
@@ -55,12 +55,12 @@ module cache
     input wire en_rx,
     input wire `addr_t pcx,
     output reg hitx,
-    output reg `dword_t instx,
+    output reg `word_t instx,
 
     input wire en_ry,
     input wire `addr_t pcy,
     output reg hity,
-    output reg `dword_t insty,
+    output reg `word_t insty,
 
     // memory I/O
     input wire `byte_t data_in,
@@ -95,7 +95,7 @@ reg mode; // inst / data
 reg `byte_t counter;
 reg `addr_t read_addr;
 reg `byte_t read_size;
-reg `dword_t read_data;
+reg `word_t read_data;
 
 wire `byte_t mem_data;
 assign mem_data = data_in;

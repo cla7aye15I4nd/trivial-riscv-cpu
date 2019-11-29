@@ -2,33 +2,33 @@ module rs_ls(
     // Allocator
     input wire en,
     input wire `sinst_t op,
-    input wire `dword_t imm,
+    input wire `word_t imm,
     input wire `regtag_t tagx,
     input wire `regtag_t tagy,
     input wire `regtag_t tagw,
-    input wire `dword_t datax,
-    input wire `dword_t datay,
-    input wire `addr_t addrw,
+    input wire `word_t datax,
+    input wire `word_t datay,
+    input wire `regaddr_t addrw,
 
     // Update signal from alu execuator
     input wire busy_alu0,
-    input wire `dword_t alu_data0,
+    input wire `word_t alu_data0,
 
     input wire busy_alu1,
-    input wire `dword_t alu_data1,
+    input wire `word_t alu_data1,
 
     input wire busy_ls,
-    input wire `dword_t ls_data,
+    input wire `word_t ls_data,
 
     // To ls module
     output wire ls_busy_out,
-    output wire `dword_t ls_offset_out,
+    output wire `word_t ls_offset_out,
     output wire `sinst_t ls_op_out,
     output wire `regtag_t ls_tagx_out,
     output wire `regtag_t ls_tagy_out,
     output wire `regtag_t ls_tagw_out,
-    output wire `dword_t ls_datax_out,
-    output wire `dword_t ls_datay_out,
+    output wire `word_t ls_datax_out,
+    output wire `word_t ls_datay_out,
     output wire `regaddr_t ls_target_out,
 
     input wire clk,
@@ -40,7 +40,7 @@ reg busy;
 reg `sinst_t op_ls;
 reg `regaddr_t target;
 reg `regtag_t tag_rx, tag_ry, tag_w;
-reg `dword_t data_rx, data_ry, offset_ls;
+reg `word_t data_rx, data_ry, offset_ls;
 
 assign ls_busy_out = busy;
 assign ls_offset_out = offset_ls;
