@@ -2,7 +2,7 @@ module decoder_type_s (
     input  wire `inst_t     inst,
 
     output reg  `oper_t      op,
-    output wire `dword_t      imm,
+    output wire `word_t      imm,
     output wire `regaddr_t   reg_read_addrx,
     output wire `regaddr_t   reg_read_addry
 );

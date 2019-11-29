@@ -8,13 +8,13 @@ module decoder_type_i(
     input wire `inst_t     inst,
 
     output reg `oper_t      op,
-    output reg `dword_t      imm,
+    output reg `word_t      imm,
     output wire `regaddr_t   reg_read_addr,
     output wire `regaddr_t   reg_write_addr
 );
 /* I-type and L-type use same decoder */
 
-wire `dword_t imm0;
+wire `word_t imm0;
 assign reg_read_addr  = inst[19 : 15];
 assign reg_write_addr = inst[11 : 7];
 assign imm0 = $signed(inst[31 : 20]); /* may can use less wires */

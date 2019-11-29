@@ -18,7 +18,7 @@ module decoder(
 
     output reg `addr_t pc_out,
     output reg `oper_t op, 
-    output reg `dword_t imm,
+    output reg `word_t imm,
     output reg en_rx,
     output reg en_ry,
     output reg en_w,
@@ -28,7 +28,7 @@ module decoder(
 );
 
 wire `oper_t op_i, op_r, op_s, op_b;
-wire `dword_t imm_i, imm_s, imm_b;
+wire `word_t imm_i, imm_s, imm_b;
 wire `regaddr_t reg_read_addrx_r, reg_read_addrx_s, reg_read_addrx_b;
 wire `regaddr_t reg_read_addry_i, reg_read_addry_r, reg_read_addry_s, reg_read_addry_b;
 wire `regaddr_t reg_write_addr_i, reg_write_addr_r;
