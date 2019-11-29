@@ -1,13 +1,4 @@
-`include "common/fifo/fifo.v"
 
-`include "common/uart/uart_rx.v"
-`include "common/uart/uart_tx.v"
-`include "common/uart/uart_baud_clk.v"
-`include "common/uart/uart.v"
-
-`include "hci.v"
-`include "cpu.v"
-`include "ram/ram.v"
 `include "riscv_top.v"
 `timescale 1ns/1ps  
 
