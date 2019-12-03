@@ -119,14 +119,32 @@
     input wire `word_t data,
 
 `define UPDATE_PAIR(_tag, _data, tag, data)                                                             \
-    {_tag, _data} <= (busy_alu0 == 0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
-                     (busy_alu1 == 0 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
-                     (busy_ls == 0   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
+    {_tag, _data} <= (en_alu0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
+                     (en_alu1 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
+                     (en_ls   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
                      {tag, data};
+                     
 `define UPDATE_VAR(_tag, tag) \
-    _tag <= (busy_alu0 == 0 && tag == `ALU_MASTER) ? `UNLOCKED : \
-            (busy_alu1 == 0 && tag == `ALU_SALVER) ? `UNLOCKED : \
-            (busy_ls == 0 && tag == `LOAD_STORE) ? `UNLOCKED   : \
+    _tag <= (en_alu0 && tag == `ALU_MASTER) ? `UNLOCKED : \
+            (en_alu1 && tag == `ALU_SALVER) ? `UNLOCKED : \
+            (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
             tag;
+
+`define READ_VAR_DEFINE(_en_r, _reg_read_addr, _data, _lock)\
+    input wire _en_r,                                       \
+    input wire `regaddr_t _reg_read_addr,                   \
+    output wire `word_t _data,                               \
+    output wire `regtag_t _lock,
+
+`define WRITE_VAR_DEFINE(_en_w, _reg_write_addr, _write_data)   \
+    input wire _en_w,                                           \
+    input wire `regaddr_t _reg_write_addr,                      \
+    input wire `word_t _write_data,
+
+`define WRITE_TAG_DEFINE(_en_w, _reg_write_addr, _write_data)   \
+    input wire _en_w,                                           \
+    input wire `regaddr_t _reg_write_addr,                      \
+    input wire `regtag_t _write_data,
+
 
 `endif

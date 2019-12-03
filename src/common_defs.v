@@ -21,4 +21,4 @@
 
 /* constant */
 `define ZERO 32'h00000000
-`define NULL_PTR  17'b1111_1111_1111_1111_1
+`define NULL_PTR  32'hffffffff
