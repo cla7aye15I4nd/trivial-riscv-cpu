@@ -11,12 +11,15 @@ module rs_ls(
     input wire `regaddr_t addrw,
 
     // Update signal from alu execuator
+    input wire en_alu0,
     input wire busy_alu0,
     input wire `word_t alu_data0,
 
+    input wire en_alu1,
     input wire busy_alu1,
     input wire `word_t alu_data1,
 
+    input wire en_ls,
     input wire busy_ls,
     input wire `word_t ls_data,
 
@@ -31,10 +34,17 @@ module rs_ls(
     output wire `word_t ls_datay_out,
     output wire `regaddr_t ls_target_out,
 
+    // output reg enw2,
+    // output reg `regaddr_t regaddr2,
+    // output reg `regtag_t  regtag2,
+
     input wire clk,
     input wire rdy,
     input wire rst
 );
+
+reg `regtag_t tag_rx_s, tag_ry_s, tag_w_s;
+reg `word_t data_rx_s, data_ry_s;
 
 reg busy;
 reg `sinst_t op_ls;
@@ -52,21 +62,34 @@ assign ls_datax_out = data_rx;
 assign ls_datay_out = data_ry;
 assign ls_target_out = target;
 
+always @(posedge clk) begin
+    if (rst) begin
+        {tag_rx_s, tag_ry_s, tag_w_s} = {3{`UNLOCKED}};
+        {data_rx_s, data_ry_s} = 0;
+    end else if(rdy && en) begin
+        tag_rx_s <= tagx;
+        tag_ry_s <= tagy;
+        tag_w_s <= tagw;
+        data_rx_s <= datax;
+        data_ry_s <= datay;
+    end
+end
+
 always @(negedge clk) begin
     if (rst) begin
         {busy, op_ls, target, data_rx, data_ry} = 0;
-        {tag_rx, tag_ry, tag_w} = {`UNLOCKED, `UNLOCKED, `UNLOCKED};
+        {tag_rx, tag_ry, tag_w} = {3{`UNLOCKED}};
     end else if (rdy) begin
         /* Input instruction exist, update by input or origin value */
         if (en) begin
             busy <= 1;
             op_ls <= op;
             offset_ls <= imm;
-            `UPDATE_PAIR(tag_rx, data_rx, tagx, datax)
-            `UPDATE_PAIR(tag_ry, data_ry, tagy, datay)
-            `UPDATE_VAR(tag_w, tagw)
+            `UPDATE_PAIR(tag_rx, data_rx, tag_rx_s, data_rx_s)
+            `UPDATE_PAIR(tag_ry, data_ry, tag_ry_s, data_ry_s)
+            `UPDATE_VAR(tag_w, tag_w_s)
             target <= addrw;
-        end else if (busy) begin
+        end else begin
             busy <= busy_ls;
             `UPDATE_PAIR(tag_rx, data_rx, tag_rx, data_rx)
             `UPDATE_PAIR(tag_ry, data_ry, tag_ry, data_ry)
