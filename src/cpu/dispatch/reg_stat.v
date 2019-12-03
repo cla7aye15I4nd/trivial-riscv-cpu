@@ -1,105 +1,88 @@
-`define READ_VAR_DEFINE(_en_r, _reg_read_addr, _data, _lock)\
-    input wire _en_r,                                       \
-    input wire `regaddr_t _reg_read_addr,                   \
-    output reg `word_t _data,                               \
-    output reg `regtag_t _lock,
-
-`define WRITE_VAR_DEFINE(_en_w, _reg_write_addr, _write_data)   \
-    input wire _en_w,                                           \
-    input wire `regaddr_t _reg_write_addr,                      \
-    input wire `word_t _write_data,
-
-`define WRITE_TAG_DEFINE(_en_w, _reg_write_addr, _write_data)   \
-    input wire _en_w,                                           \
-    input wire `regaddr_t _reg_write_addr,                      \
-    input wire `regtag_t _write_data,
-
-`define FROM_WRITE(addr) (en_mod0 && reg_addr0 == addr) ? reg_tag0 : (en_mod1 && reg_addr1 == addr) ? reg_tag1
-
-`define REG_OUTPUT(_en_r, _reg_read_addr, _data, _lock) \
-if (_en_r) begin                                        \
-    _lock = `FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr];                                                        \
-    _data = (`FROM_WRITE(_reg_read_addr) : lock[_reg_read_addr]) == `UNLOCKED ? data[_reg_read_addr]: _reg_read_addr;  end 
-
-`define REG_WRITE(_en_w, _reg_write_addr, _data)    \
-if (_en_w) begin                                    \
-    lock[_reg_write_addr] <= `UNLOCKED;             \
-    data[_reg_write_addr] <= _data;                 \
-end
-
-`define REG_TAG_WRITE(_en_w, _addr, _tag)   \
-if (_en_w) begin                            \
-    lock[_addr] <= _tag;                    \
-end
-
 module reg_stat(
     input wire `word_t imm0, imm1,
-    `READ_VAR_DEFINE(en_rx0, reg_read_addrx0, read_datax0, lockx0)
-    `READ_VAR_DEFINE(en_ry0, reg_read_addry0, read_datay0, locky0)
-    `READ_VAR_DEFINE(en_rx1, reg_read_addrx1, read_datax1, lockx1)
-    `READ_VAR_DEFINE(en_ry1, reg_read_addry1, read_datay1, locky1)
+    `READ_VAR_DEFINE(en_rx0, addrx0, datax0, tagx0)
+    `READ_VAR_DEFINE(en_ry0, addry0, datay0, tagy0)
+    `READ_VAR_DEFINE(en_rx1, addrx1, datax1, tagx1)
+    `READ_VAR_DEFINE(en_ry1, addry1, datay1, tagy1)
     
     input en_rw0,
     input wire `regaddr_t addrw0,
-    output reg `regtag_t lockw0,
+    output wire `regtag_t tagw0,
 
     input en_rw1,
     input wire `regaddr_t addrw1,
-    output reg `regtag_t lockw1,
+    output wire `regtag_t tagw1,
 
-    // From Execute and L/S
-    // Update Data (no conflict)
     `WRITE_VAR_DEFINE(en_w0, reg_write_addr0, write_data0)
     `WRITE_VAR_DEFINE(en_w1, reg_write_addr1, write_data1)
     `WRITE_VAR_DEFINE(en_w2, reg_write_addr2, write_data2)
 
-    // From allocator
-    // Update Tag (no conflict)
     `WRITE_TAG_DEFINE(en_mod0, reg_addr0, reg_tag0)
-    `WRITE_TAG_DEFINE(en_mod1, reg_addr1, reg_tag1)
+    // `WRITE_TAG_DEFINE(en_mod1, reg_addr1, reg_tag1)
+    // `WRITE_TAG_DEFINE(en_mod2, reg_addr2, reg_tag2)
 
     input wire clk,
     input wire rst,
     input wire rdy
 );
 
-reg `word_t data[0 : `REG_COUNT-1];
-reg `regtag_t lock[0 : `REG_COUNT-1];
 integer i;
+reg `word_t data[0 : `REG_COUNT-1];
+reg `regtag_t tag[0 : `REG_COUNT-1];
 
-always @(*) begin
-    if(rst == 0 && rdy) begin
-        `REG_OUTPUT(en_rx0, reg_read_addrx0, read_datax0, lockx0) else begin {read_datax0, lockx0} = {imm0, `UNLOCKED}; end
-        `REG_OUTPUT(en_ry0, reg_read_addry0, read_datay0, locky0) else begin {read_datay0, locky0} = {`ZERO, `UNLOCKED}; end
-        `REG_OUTPUT(en_rx1, reg_read_addrx1, read_datax1, lockx1) else begin {read_datax1, lockx1} = {imm1, `UNLOCKED}; end
-        `REG_OUTPUT(en_ry1, reg_read_addry1, read_datay1, locky1) else begin {read_datay1, locky1} = {`ZERO, `UNLOCKED}; end
+wire `regtag_t tagdebug;
+assign tagdebug = tag[15];
 
-        if (en_rw0) begin
-            lockw0 = `FROM_WRITE(addrw0) : lock[addrw0];
-        end
-        if (en_rw1) begin
-            lockw1 = `FROM_WRITE(addrw1) : lock[addrw1];
-        end
-    end
-end
+assign datax0 = en_rx0 ? data[addrx0]: imm0;
+assign datay0 = en_ry0 ? data[addry0]: imm0;
+assign tagx0  = en_rx0 ? tag [addrx0]: `UNLOCKED;
+assign tagy0  = en_ry0 ? tag [addry0]: `UNLOCKED;
+assign tagw0  = en_rw0 ? tag [addrw0]: `UNLOCKED;
+
+assign datax1 = en_rx1 ? data[addrx1]: imm1;
+assign datay1 = en_ry1 ? data[addry1]: imm1;
+assign tagx1  = en_rx1 ? tag [addrx1]: `UNLOCKED;
+assign tagy1  = en_ry1 ? tag [addry1]: `UNLOCKED;
+assign tagw1  = en_rw1 ? tag [addrw1]: `UNLOCKED;
 
 always @(posedge clk) begin
     if (rst) begin
         for (i = 0; i < `REG_COUNT; i = i + 1) begin
             data[i] <= `ZERO;
-            lock[i] <= `UNLOCKED;
+            tag[i] <= `UNLOCKED;
         end
-    end else begin
-        `REG_TAG_WRITE(en_mod0, reg_addr0, reg_tag0)
-        `REG_TAG_WRITE(en_mod1, reg_addr1, reg_tag1)
-    end
-end
+    end else if(rdy) begin
+        if (en_mod0 && reg_addr0 > 0) tag[reg_addr0] <= reg_tag0;
+        // if (en_mod1 && reg_addr1 > 0) tag[reg_addr1] <= reg_tag1;
+        // if (en_mod2 && reg_addr2 > 0) tag[reg_addr2] <= reg_tag2;
 
-always @(negedge clk) begin
-    if (rdy && rst == 0) begin
-        `REG_WRITE(en_w0, reg_write_addr0, write_data0)
-        `REG_WRITE(en_w1, reg_write_addr1, write_data1)
-        `REG_WRITE(en_w2, reg_write_addr2, write_data2)
+        // if (en_mod0 || en_w0) begin
+        //     $write("## tag : %x %x, data: %x %x\n", en_mod0, reg_addr0, en_w0, reg_write_addr0);
+        // end
+
+        if (en_w0 && reg_write_addr0 > 0
+            && (~en_mod0 || reg_write_addr0 != reg_addr0)
+            //&& (~en_mod1 || reg_write_addr0 != reg_addr1)
+            //&& (~en_mod2 || reg_write_addr0 != reg_addr2)
+            ) begin
+            {data[reg_write_addr0], tag[reg_write_addr0]} <= {write_data0, `UNLOCKED};
+        end
+
+        if (en_w1 && reg_write_addr1 > 0
+            && (~en_mod0 || reg_write_addr1 != reg_addr0)
+            //&& (~en_mod1 || reg_write_addr1 != reg_addr1)
+            //&& (~en_mod2 || reg_write_addr1 != reg_addr2)
+            ) begin
+            {data[reg_write_addr1], tag[reg_write_addr1]} <= {write_data1, `UNLOCKED};
+        end
+
+        if (en_w2 && reg_write_addr2 > 0
+            && (~en_mod0 || reg_write_addr2 != reg_addr0)
+            //&& (~en_mod1 || reg_write_addr2 != reg_addr1)
+            //&& (~en_mod2 || reg_write_addr2 != reg_addr2)
+            ) begin
+            {data[reg_write_addr2], tag[reg_write_addr2]} <= {write_data2, `UNLOCKED};
+        end
     end
 end
  
