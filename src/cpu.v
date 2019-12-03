@@ -43,19 +43,22 @@ module cpu(
 wire cache_en_rx, cache_en_ry, cache_hitx, cache_hity;
 wire `addr_t cache_pcx, cache_pcy;
 wire `word_t cache_instx, cache_insty;
-wire cahce_en_ls, cache_r_nw_in, finish;
+wire cahce_en_ls, cache_ls_oper, cahce_in_fifo, cahce_finish;
 wire `addr_t cache_ls_addr;
 wire `byte_t cache_ls_size;
-wire `word_t cache_data_in;
+wire `word_t cache_ls_data;
 wire `word_t cache_data_out;
 
 cache cache_instance(
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in),
 
-  .en_ls(cache_en_ls), .r_nw_in(cache_r_nw_in),
-  .ls_addr(cache_ls_addr), .ls_size(cache_ls_size),
-  .ls_data_in(cache_data_in),
-  .finish(finish), .ls_data_out(cache_data_out),
+  .en_ls(cache_en_ls), 
+  .ls_oper(cache_ls_oper),
+  .ls_addr(cache_ls_addr), 
+  .ls_size(cache_ls_size),
+  .ls_data(cache_ls_data),
+  .in_fifo(cache_in_fifo), .finish(cache_finish),
+  .ls_data_out(cache_data_out),
 
   .en_rx(cache_en_rx), .pcx(cache_pcx), .hitx(cache_hitx), .instx(cache_instx),
   .en_ry(cache_en_ry), .pcy(cache_pcy), .hity(cache_hity), .insty(cache_insty),
@@ -68,6 +71,9 @@ wire `addr_t if_pc0, if_pc1;
 wire `inst_t if_inst0, if_inst1;
 wire en_jmp0, en_jmp1;
 wire `addr_t jmp_addr0, jmp_addr1;
+wire en_branch;
+wire `word_t result;
+
 // IF
 cpu_if cpu_if_instance(
     .clk(clk_in), .rst(rst_in), .rdy(rdy_in),
@@ -80,6 +86,8 @@ cpu_if cpu_if_instance(
 
     .en_jmp0(en_jmp0), .en_jmp1(en_jmp1),
     .jmp_addr0(jmp_addr0), .jmp_addr1(jmp_addr1),
+
+    .en_branch(en_branch), .result(result),
 
     .issue0(issue0), .issue1(issue1),
     .pc0_out(if_pc0), .pc1_out(if_pc1),
@@ -97,6 +105,10 @@ wire `regaddr_t reg_read_addrx0, reg_read_addrx1;
 wire `regaddr_t reg_read_addry0, reg_read_addry1;
 wire `regaddr_t reg_write_addr0, reg_write_addr1;
 wire `addr_t alloc_pc0, alloc_pc1;
+
+wire mod_enw0, mod_enw1, mod_enw2;
+wire `regaddr_t mod_addr0, mod_addr1, mod_addr2;
+wire `regtag_t  mod_tag0, mod_tag1, mod_tag2;
 
 // Decoder
 decoder decoder_master(
@@ -138,24 +150,34 @@ wire regs_enw0, regs_enw1, regs_enw2;
 wire `regaddr_t regs_waddr0, regs_waddr1, regs_waddr2;
 wire `word_t regs_wdata0, regs_wdata1, regs_wdata2;
 
+wire alu0_busy_in, alu1_busy_in, ls_busy_in, branch_busy_in;
+wire `sinst_t alu0_op_in, alu1_op_in, ls_op_in, branch_op_in;
+wire `regtag_t alu0_tagx_in, alu1_tagx_in, ls_tagx_in, branch_tagx_in;
+wire `regtag_t alu0_tagy_in, alu1_tagy_in, ls_tagy_in, branch_tagy_in;
+wire `regtag_t alu0_tagw_in, alu1_tagw_in, ls_tagw_in;
+wire `word_t alu0_datax_in, alu1_datax_in, ls_datax_in, branch_datax_in;
+wire `word_t alu0_datay_in, alu1_datay_in, ls_datay_in, branch_datay_in;
+wire `regaddr_t alu0_target_in, alu1_target_in, ls_target_in;
+wire `word_t ls_offset_in, branch_offset_in;
+
 // RegStat
 reg_stat reg_stat_instance(
   .imm0(imm0), .imm1(imm1),
-  .en_rx0(en_rx0), .reg_read_addrx0(reg_read_addrx0), .read_datax0(read_datax0), .lockx0(read_lockx0),
-  .en_ry0(en_ry0), .reg_read_addry0(reg_read_addry0), .read_datay0(read_datay0), .locky0(read_locky0),
-  .en_rx1(en_rx1), .reg_read_addrx1(reg_read_addrx1), .read_datax1(read_datax1), .lockx1(read_lockx1),
-  .en_ry1(en_ry1), .reg_read_addry1(reg_read_addry1), .read_datay1(read_datay1), .locky1(read_locky1),
+  .en_rx0(en_rx0), .addrx0(reg_read_addrx0), .datax0(read_datax0), .tagx0(read_lockx0),
+  .en_ry0(en_ry0), .addry0(reg_read_addry0), .datay0(read_datay0), .tagy0(read_locky0),
+  .en_rx1(en_rx1), .addrx1(reg_read_addrx1), .datax1(read_datax1), .tagx1(read_lockx1),
+  .en_ry1(en_ry1), .addry1(reg_read_addry1), .datay1(read_datay1), .tagy1(read_locky1),
   
-  .en_rw0(en_w0), .addrw0(reg_write_addr0), .lockw0(write_lock0),
-  .en_rw1(en_w1), .addrw1(reg_write_addr1), .lockw1(write_lock1),
+  .en_rw0(en_w0), .addrw0(reg_write_addr0), .tagw0(write_lock0),
+  .en_rw1(en_w1), .addrw1(reg_write_addr1), .tagw1(write_lock1),
 
   .en_w0(regs_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
   .en_w1(regs_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
   .en_w2(regs_enw2), .reg_write_addr2(regs_waddr2), .write_data2(regs_wdata2),
 
-  .en_mod0(alloc_en_mw0), .en_mod1(alloc_en_mw1), 
-  .reg_addr0(alloc_maddr0), .reg_addr1(alloc_maddr1),
-  .reg_tag0(alloc_mtag0), .reg_tag1(alloc_mtag1),
+  .en_mod0(mod_enw0), .reg_addr0(mod_addr0), .reg_tag0(mod_tag0),
+  // .en_mod1(mod_enw1), .reg_addr1(mod_addr1), .reg_tag1(mod_tag1),
+  // .en_mod2(mod_enw2), .reg_addr2(mod_addr2), .reg_tag2(mod_tag2),
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
@@ -182,25 +204,19 @@ wire `word_t alloc_branch_offset, alloc_ls_offset;
 
 allocator allocator_instance(
   .op0_in(op0), .pc0_in(alloc_pc0), 
-  .en_rx0_in(en_rx0), .en_ry0_in(en_ry0), .en_w0_in(en_w0),
   .imm0_in(imm0), .datax0_in(read_datax0), .datay0_in(read_datay0),
   .tagx0_in(read_lockx0), .tagy0_in(read_locky0), .tagw0_in(write_lock0),
   .addrx0_in(reg_read_addrx0), .addry0_in(reg_read_addry0), .addrw0_in(reg_write_addr0),
 
   .op1_in(op1), .pc1_in(alloc_pc1), 
-  .en_rx1_in(en_rx1), .en_ry1_in(en_ry1), .en_w1_in(en_w1),
   .imm1_in(imm1), .datax1_in(read_datax1), .datay1_in(read_datay1),
   .tagx1_in(read_lockx1), .tagy1_in(read_locky1), .tagw1_in(write_lock1),
   .addrx1_in(reg_read_addrx1), .addry1_in(reg_read_addry1), .addrw1_in(reg_write_addr1),
 
-  .en_mw0(alloc_en_mw0), .en_mw1(alloc_en_mw1),
-  .maddr0(alloc_maddr0), .maddr1(alloc_maddr1),
-  .mtag0(alloc_mtag0), .mtag1(alloc_mtag1),
-
-  .alu0_busy_in(alu0_busy_upd), .alu0_tagx_in(alu0_tagx_upd), .alu0_tagy_in(alu0_tagy_upd), .alu0_tagw_in(alu0_tagw_upd), 
-  .alu1_busy_in(alu1_busy_upd), .alu1_tagx_in(alu1_tagx_upd), .alu1_tagy_in(alu1_tagy_upd), .alu1_tagw_in(alu1_tagw_upd),
-  .ls_busy_in(ls_busy_upd), .ls_tagx_in(ls_tagx_upd), .ls_tagy_in(ls_tagy_upd), .ls_tagw_in(ls_tagw_upd),
-  .branch_busy_in(branch_busy_upd), .branch_tagx_in(branch_tagx_upd), .branch_tagy_in(branch_tagy_upd),
+  .alu0_busy_in(alu0_busy_in), .alu0_tagx_in(alu0_tagx_in), .alu0_tagy_in(alu0_tagy_in), .alu0_tagw_in(alu0_tagw_in), 
+  .alu1_busy_in(alu1_busy_in), .alu1_tagx_in(alu1_tagx_in), .alu1_tagy_in(alu1_tagy_in), .alu1_tagw_in(alu1_tagw_in),
+  .ls_busy_in(ls_busy_in), .ls_tagx_in(ls_tagx_in), .ls_tagy_in(ls_tagy_in), .ls_tagw_in(ls_tagw_in),
+  .branch_busy_in(branch_busy_in), .branch_tagx_in(branch_tagx_in), .branch_tagy_in(branch_tagy_in),
 
   .alu0_pc_out(alu0_pc_in), .alu0_en_out(alloc_en0), .alu0_op_out(alloc_op0), 
   .alu0_tagx_out(alloc_tagx0), .alu0_tagy_out(alloc_tagy0), .alu0_tagw_out(alloc_tagw0),
@@ -219,19 +235,16 @@ allocator allocator_instance(
   .branch_tagx_out(alloc_branch_tagx), .branch_tagy_out(alloc_branch_tagy),
   .branch_datax_out(alloc_branch_datax), .branch_datay_out(alloc_branch_datay),
 
+  .en_mw0(regs_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
+  .en_mw1(regs_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
+  .en_mw2(regs_enw2), .reg_write_addr2(regs_waddr2), .write_data2(regs_wdata2),
+
+  .en_mod0(mod_enw0), .reg_addr0(mod_addr0), .reg_tag0(mod_tag0),
+  
   .issue0(issue0), .issue1(issue1),
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
 
-wire alu0_busy_in, alu1_busy_in, ls_busy_in, branch_busy_in;
-wire `sinst_t alu0_op_in, alu1_op_in, ls_op_in, branch_op_in;
-wire `regtag_t alu0_tagx_in, alu1_tagx_in, ls_tagx_in, branch_tagx_in;
-wire `regtag_t alu0_tagy_in, alu1_tagy_in, ls_tagy_in, branch_tagy_in;
-wire `regtag_t alu0_tagw_in, alu1_tagw_in, ls_tagw_in;
-wire `word_t alu0_datax_in, alu1_datax_in, ls_datax_in, branch_datax_in;
-wire `word_t alu0_datay_in, alu1_datay_in, ls_datay_in, branch_datay_in;
-wire `regaddr_t alu0_target_in, alu1_target_in, ls_target_in;
-wire `word_t ls_offset_in, branch_offset_in;
 // rs_alu
 rs_alu rs_alu_instance(
   // From allocator
@@ -245,19 +258,22 @@ rs_alu rs_alu_instance(
   .tagx1(alloc_tagx1), .tagy1(alloc_tagy1), .tagw1(alloc_tagw1),
   .datax1(alloc_datax1), .datay1(alloc_datay1), .addrw1(alloc_addrw1),
 
-  .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
-  .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
-  .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
+  .en_alu0(regs_enw0), .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
+  .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
+  .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
 
-  .pc0_out(alu0_pc_out),
+  .alu_pc0_out(alu0_pc_out),
   .alu_busy0_out(alu0_busy_in), .alu_op0_out(alu0_op_in),
   .alu_tagx0_out(alu0_tagx_in), .alu_tagy0_out(alu0_tagy_in), .alu_tagw0_out(alu0_tagw_in),
   .alu_datax0_out(alu0_datax_in), .alu_datay0_out(alu0_datay_in), .alu_target0_out(alu0_target_in),
 
-  .pc1_out(alu1_pc_out),
+  .alu_pc1_out(alu1_pc_out),
   .alu_busy1_out(alu1_busy_in), .alu_op1_out(alu1_op_in),
   .alu_tagx1_out(alu1_tagx_in), .alu_tagy1_out(alu1_tagy_in), .alu_tagw1_out(alu1_tagw_in),
   .alu_datax1_out(alu1_datax_in), .alu_datay1_out(alu1_datay_in), .alu_target1_out(alu1_target_in),
+
+  // .enw0(mod_enw0), .regaddr0(mod_addr0), .regtag0(mod_tag0), 
+  // .enw1(mod_enw1), .regaddr1(mod_addr1), .regtag1(mod_tag1), 
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
@@ -268,13 +284,15 @@ rs_ls rs_ls_instance(
   .tagx(alloc_ls_tagx), .tagy(alloc_ls_tagy), .tagw(alloc_ls_tagw),
   .datax(alloc_ls_datax), .datay(alloc_ls_datay), .addrw(alloc_ls_addrw),
 
-  .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
-  .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
-  .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
+  .en_alu0(regs_enw0), .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
+  .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
+  .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
 
   .ls_busy_out(ls_busy_in), .ls_offset_out(ls_offset_in), .ls_op_out(ls_op_in),
   .ls_tagx_out(ls_tagx_in), .ls_tagy_out(ls_tagy_in), .ls_tagw_out(ls_tagw_in),
   .ls_datax_out(ls_datax_in), .ls_datay_out(ls_datay_in), .ls_target_out(ls_target_in),
+
+  //.enw2(mod_enw2), .regaddr2(mod_addr2), .regtag2(mod_tag2),
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
@@ -284,10 +302,11 @@ rs_branch rs_branch_instance(
   .imm(alloc_branch_offset), .tagx(alloc_branch_tagx), .tagy(alloc_branch_tagy), 
   .datax(alloc_branch_datax), .datay(alloc_branch_datay), 
 
-  .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
-  .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
-  .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
-
+  .en_alu0(regs_enw0), .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
+  .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
+  .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
+  .busy_branch(branch_busy_upd),
+  
   .pc_out(branch_pc_out), .branch_busy_out(branch_busy_in),
   .branch_offset_out(branch_offset_in), .branch_op_out(branch_op_in), 
   .branch_tagx_out(branch_tagx_in), .branch_tagy_out(branch_tagy_in),
@@ -340,14 +359,19 @@ ex_ls ex_ls_instance(
   .ls_tagy_out(ls_tagy_upd), 
   .ls_tagw_out(ls_tagw_upd),
 
-  .en_ls(cache_en_ls), .r_nw_out(cache_r_nw_in),
-  .ls_addr(cache_ls_addr), .ls_size(cache_ls_size),
-  .ls_data_out(cache_data_in), 
-  .finish(finish), .ls_data_in(cache_data_out),
-
   .en(regs_enw2), .target_out(regs_waddr2), .data_out(regs_wdata2),
 
-  .clk(clk_in)
+  .en_ls(cache_en_ls), 
+  .ls_oper(cache_ls_oper),
+  .ls_addr(cache_ls_addr), 
+  .ls_size(cache_ls_size),
+  .ls_data(cache_ls_data), 
+
+  .in_fifo_in(cache_in_fifo), 
+  .finish(cache_finish),
+  .ls_data_in(cache_data_out),
+
+  .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
 
 ex_branch ex_branch_instance(
@@ -360,7 +384,7 @@ ex_branch ex_branch_instance(
   .branch_tagx_out(branch_tagx_upd),
   .branch_tagy_out(branch_tagy_upd),
 
-  .en(), .dest_out(),
+  .en(en_branch), .dest_out(result), 
   .clk(clk_in), .rdy(rdy_in)
 );
 
