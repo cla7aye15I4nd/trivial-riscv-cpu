@@ -9,7 +9,7 @@ module decoder_type_s (
 
 assign reg_read_addrx = inst[19 : 15];
 assign reg_read_addry = inst[24 : 20];
-assign imm            = $signed(inst[31 : 25]);
+assign imm            = $signed({inst[31 : 25], inst[11 : 7]});
 
 always @(*) begin
     case (inst[14: 12]) 

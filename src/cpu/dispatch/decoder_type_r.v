@@ -6,8 +6,8 @@ module decoder_type_r (
     output wire `regaddr_t   reg_read_addry,
     output wire `regaddr_t   reg_write_addr
 );
-assign reg_read_addrx = inst[19 : 15];
 assign reg_read_addry = inst[24 : 20];
+assign reg_read_addrx = inst[19 : 15];
 assign reg_write_addr = inst[11 : 7];
 
 always @(*) begin

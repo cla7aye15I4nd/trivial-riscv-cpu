@@ -77,20 +77,12 @@ always @(posedge clk) begin
             `SET_SIGNAL(0, 0, 0);
         end else begin
             case (inst[6 : 0]) // optype
-                `I_TYPE: begin
+                `I_TYPE, `L_TYPE: begin
                     op  <= op_i;
                     imm <= imm_i;
-                    `SET_SIGNAL(0, 1, 1);
-                    reg_read_addrx <= `ZERO;
-                    reg_read_addry <= reg_read_addry_i;
-                    reg_write_addr <= reg_write_addr_i;
-                end
-                `L_TYPE: begin   
-                    op  <= op_i;
-                    imm <= imm_i;
-                    `SET_SIGNAL(0, 1, 1);
-                    reg_read_addrx <= `ZERO;
-                    reg_read_addry <= reg_read_addry_i;
+                    `SET_SIGNAL(1, 0, 1);
+                    reg_read_addrx <= reg_read_addry_i;
+                    reg_read_addry <= `ZERO;
                     reg_write_addr <= reg_write_addr_i;
                 end
                 `R_TYPE: begin
@@ -150,6 +142,7 @@ always @(posedge clk) begin
                 end
                 default: begin
                     op <= `OP_NOP;
+                    `SET_SIGNAL(0, 0, 0);
                 end
             endcase
         end
