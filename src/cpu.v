@@ -10,7 +10,6 @@
 `include "cpu/execute/ex_ls.v"
 `include "cpu/execute/rs_branch.v"
 `include "cpu/execute/ex_branch.v"
-`include "cpu/commit/reorder_buffer.v"
 `include "cache/cache.v"
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
@@ -112,8 +111,9 @@ wire `regtag_t  mod_tag0, mod_tag1, mod_tag2;
 
 // Decoder
 decoder decoder_master(
-  .clk(clk_in), .rdy(rdy_in), 
-  .hit(if_hit0), .pc(if_pc0), .inst(if_inst0),
+  .clk(clk_in), .rdy(rdy_in), .rst(rst_in),
+  .hit(if_hit0), .issue(issue0),
+  .pc_in(if_pc0), .inst_in(if_inst0),
 
   .pc_out(alloc_pc0),
   .op(op0), .imm(imm0), 
@@ -124,8 +124,9 @@ decoder decoder_master(
 );
 
 decoder decoder_salve(
-  .clk(clk_in), .rdy(rdy_in), //.stall()
-  .hit(if_hit1), .pc(if_pc1), .inst(if_inst1),
+  .clk(clk_in), .rdy(rdy_in), .rst(rst_in),
+  .hit(if_hit1), .issue(issue1),
+  .pc_in(if_pc1), .inst_in(if_inst1),
 
   .pc_out(alloc_pc1),
   .op(op1), .imm(imm1), 
@@ -201,6 +202,7 @@ wire `regtag_t ls_tagx_upd, ls_tagy_upd, ls_tagw_upd;
 wire `regtag_t branch_tagx_upd, branch_tagy_upd;
 wire `addr_t alu0_pc_in, alu1_pc_in, branch_pc_in;
 wire `word_t alloc_branch_offset, alloc_ls_offset;
+wire alu0_next_busy, ls_next_busy, branch_next_busy;
 
 allocator allocator_instance(
   .op0_in(op0), .pc0_in(alloc_pc0), 
@@ -213,10 +215,10 @@ allocator allocator_instance(
   .tagx1_in(read_lockx1), .tagy1_in(read_locky1), .tagw1_in(write_lock1),
   .addrx1_in(reg_read_addrx1), .addry1_in(reg_read_addry1), .addrw1_in(reg_write_addr1),
 
-  .alu0_busy_in(alu0_busy_in), .alu0_tagx_in(alu0_tagx_in), .alu0_tagy_in(alu0_tagy_in), .alu0_tagw_in(alu0_tagw_in), 
+  .alu0_busy_in(alu0_next_busy), .alu0_tagx_in(alu0_tagx_in), .alu0_tagy_in(alu0_tagy_in), .alu0_tagw_in(alu0_tagw_in), 
   .alu1_busy_in(alu1_busy_in), .alu1_tagx_in(alu1_tagx_in), .alu1_tagy_in(alu1_tagy_in), .alu1_tagw_in(alu1_tagw_in),
-  .ls_busy_in(ls_busy_in), .ls_tagx_in(ls_tagx_in), .ls_tagy_in(ls_tagy_in), .ls_tagw_in(ls_tagw_in),
-  .branch_busy_in(branch_busy_in), .branch_tagx_in(branch_tagx_in), .branch_tagy_in(branch_tagy_in),
+  .ls_busy_in(ls_next_busy), .ls_tagx_in(ls_tagx_in), .ls_tagy_in(ls_tagy_in), .ls_tagw_in(ls_tagw_in),
+  .branch_busy_in(branch_next_busy), .branch_tagx_in(branch_tagx_in), .branch_tagy_in(branch_tagy_in),
 
   .alu0_pc_out(alu0_pc_in), .alu0_en_out(alloc_en0), .alu0_op_out(alloc_op0), 
   .alu0_tagx_out(alloc_tagx0), .alu0_tagy_out(alloc_tagy0), .alu0_tagw_out(alloc_tagw0),
@@ -262,6 +264,8 @@ rs_alu rs_alu_instance(
   .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
   .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
 
+  .alu0_next_busy(alu0_next_busy),
+
   .alu_pc0_out(alu0_pc_out),
   .alu_busy0_out(alu0_busy_in), .alu_op0_out(alu0_op_in),
   .alu_tagx0_out(alu0_tagx_in), .alu_tagy0_out(alu0_tagy_in), .alu_tagw0_out(alu0_tagw_in),
@@ -288,6 +292,7 @@ rs_ls rs_ls_instance(
   .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
   .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
 
+  .ls_next_busy(ls_next_busy), 
   .ls_busy_out(ls_busy_in), .ls_offset_out(ls_offset_in), .ls_op_out(ls_op_in),
   .ls_tagx_out(ls_tagx_in), .ls_tagy_out(ls_tagy_in), .ls_tagw_out(ls_tagw_in),
   .ls_datax_out(ls_datax_in), .ls_datay_out(ls_datay_in), .ls_target_out(ls_target_in),
@@ -306,11 +311,12 @@ rs_branch rs_branch_instance(
   .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
   .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
   .busy_branch(branch_busy_upd),
-  
+
   .pc_out(branch_pc_out), .branch_busy_out(branch_busy_in),
   .branch_offset_out(branch_offset_in), .branch_op_out(branch_op_in), 
   .branch_tagx_out(branch_tagx_in), .branch_tagy_out(branch_tagy_in),
   .branch_datax_out(branch_datax_in), .branch_datay_out(branch_datay_in),
+  .branch_next_busy(branch_next_busy),
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
@@ -386,10 +392,6 @@ ex_branch ex_branch_instance(
 
   .en(en_branch), .dest_out(result), 
   .clk(clk_in), .rdy(rdy_in)
-);
-
-reorder_buffer reorder_buffer_instance(
-  .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
 
 endmodule
