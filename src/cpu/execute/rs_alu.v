@@ -33,6 +33,10 @@ module rs_alu(
     input wire busy_ls,
     input wire `word_t ls_data,
     
+    output reg alu0_next_busy,
+    // output reg alu0_next_tagx,
+    // output reg alu0_next_tagy,
+
     // Output to alu execuator
     output wire `addr_t alu_pc0_out,
     output wire alu_busy0_out,
@@ -91,6 +95,16 @@ assign alu_target1_out = target[1];
 
 integer i;
 
+always @(posedge clk) begin
+    if (en0) begin
+        alu0_next_busy <= 1;
+    end else if (busy[0]) begin
+        alu0_next_busy <= {tag_rx[0], tag_ry[0], tag_w[0]} == {3{`UNLOCKED}} ? 0: 1;
+    end else begin
+        alu0_next_busy <= 0;
+    end
+end
+
 always @(negedge clk) begin
     if (rst) begin
         for (i = 0; i < `ALU_CNT; i = i + 1) begin
@@ -100,6 +114,8 @@ always @(negedge clk) begin
     end else if (rdy) begin
         /* Input instruction exist, update by input or origin value */
         if (en0) begin
+            if (busy_alu0) $display("ERROR");
+            alu0_next_busy <= 1;    
             busy[0] <= 1;
             op[0] <= op0;
             pc[0] <= pc0;
@@ -108,6 +124,7 @@ always @(negedge clk) begin
             `UPDATE_VAR(tag_w[0], tagw0)
             target[0] <= addrw0;
         end else /*if (busy[0])*/ begin
+            alu0_next_busy <= busy_alu0;
             busy[0] <= busy_alu0;
             `UPDATE_PAIR(tag_rx[0], data_rx[0], tag_rx[0], data_rx[0])
             `UPDATE_PAIR(tag_ry[0], data_ry[0], tag_ry[0], data_ry[0])

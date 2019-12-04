@@ -23,6 +23,7 @@ module rs_branch(
     input wire `word_t ls_data,
 
     input wire busy_branch,
+    output reg branch_next_busy,
 
     // To branch module
     output wire `addr_t pc_out,
@@ -38,9 +39,6 @@ module rs_branch(
     input wire rdy,
     input wire rst
 );
-
-reg `regtag_t tag_rx_s, tag_ry_s;
-reg `word_t data_rx_s, data_ry_s;
 
 reg busy;
 reg `addr_t pc_s;
@@ -60,14 +58,12 @@ assign branch_datax_out = data_rx;
 assign branch_datay_out = data_ry;
 
 always @(posedge clk) begin
-    if (rst) begin 
-        {data_rx_s, data_ry_s} <= 0;
-        {tag_rx_s, tag_ry_s} <= {2{`UNLOCKED}};
-    end else if (rdy && en) begin 
-        tag_rx_s <= tagx;
-        tag_ry_s <= tagy;
-        data_rx_s <= datax;
-        data_ry_s <= datay;
+    if (en) begin
+        branch_next_busy <= 1;
+    end else if (busy) begin
+        branch_next_busy <= {tag_rx, tag_ry, tag_w} == {3{`UNLOCKED}} ? 0: 1;
+    end else begin
+        branch_next_busy <= 0;
     end
 end
 
@@ -75,7 +71,7 @@ always @(negedge clk) begin
     if (rst) begin
         pc_s <= `ZERO;
         {busy, op_branch, offset, data_rx, data_ry} <= 0;
-        {tag_rx, tag_ry} <= {2{`UNLOCKED}};
+        {tag_rx, tag_ry} <= {`UNLOCKED, `UNLOCKED, `UNLOCKED};
     end else if (rdy) begin
         /* Input instruction exist, update by input or origin value */
         if (en) begin
@@ -83,8 +79,8 @@ always @(negedge clk) begin
             pc_s <= pc;
             op_branch <= op;
             offset <= imm;
-            `UPDATE_PAIR(tag_rx, data_rx, tag_rx_s, data_rx_s)
-            `UPDATE_PAIR(tag_ry, data_ry, tag_ry_s, data_ry_s)
+            `UPDATE_PAIR(tag_rx, data_rx, tagx, datax)
+            `UPDATE_PAIR(tag_ry, data_ry, tagy, datay)
         end else begin
             busy <= busy_branch;
             `UPDATE_PAIR(tag_rx, data_rx, tag_rx, data_rx)
