@@ -31,7 +31,7 @@ reg `word_t data[0 : `REG_COUNT-1];
 reg `regtag_t tag[0 : `REG_COUNT-1];
 
 wire `regtag_t tagdebug;
-assign tagdebug = tag[15];
+assign tagdebug = tag[14];
 
 assign datax0 = en_rx0 ? data[addrx0]: imm0;
 assign datay0 = en_ry0 ? data[addry0]: imm0;
@@ -54,16 +54,10 @@ always @(posedge clk) begin
     end else if(rdy) begin
         if (en_mod0 && reg_addr0 > 0) tag[reg_addr0] <= reg_tag0;
         // if (en_mod1 && reg_addr1 > 0) tag[reg_addr1] <= reg_tag1;
-        // if (en_mod2 && reg_addr2 > 0) tag[reg_addr2] <= reg_tag2;
-
-        // if (en_mod0 || en_w0) begin
-        //     $write("## tag : %x %x, data: %x %x\n", en_mod0, reg_addr0, en_w0, reg_write_addr0);
-        // end
-
+        
         if (en_w0 && reg_write_addr0 > 0
             && (~en_mod0 || reg_write_addr0 != reg_addr0)
             //&& (~en_mod1 || reg_write_addr0 != reg_addr1)
-            //&& (~en_mod2 || reg_write_addr0 != reg_addr2)
             ) begin
             {data[reg_write_addr0], tag[reg_write_addr0]} <= {write_data0, `UNLOCKED};
         end
@@ -71,7 +65,6 @@ always @(posedge clk) begin
         if (en_w1 && reg_write_addr1 > 0
             && (~en_mod0 || reg_write_addr1 != reg_addr0)
             //&& (~en_mod1 || reg_write_addr1 != reg_addr1)
-            //&& (~en_mod2 || reg_write_addr1 != reg_addr2)
             ) begin
             {data[reg_write_addr1], tag[reg_write_addr1]} <= {write_data1, `UNLOCKED};
         end
@@ -79,7 +72,6 @@ always @(posedge clk) begin
         if (en_w2 && reg_write_addr2 > 0
             && (~en_mod0 || reg_write_addr2 != reg_addr0)
             //&& (~en_mod1 || reg_write_addr2 != reg_addr1)
-            //&& (~en_mod2 || reg_write_addr2 != reg_addr2)
             ) begin
             {data[reg_write_addr2], tag[reg_write_addr2]} <= {write_data2, `UNLOCKED};
         end

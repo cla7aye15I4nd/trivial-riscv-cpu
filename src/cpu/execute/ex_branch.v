@@ -46,7 +46,6 @@ always @(posedge clk) begin
                     en <= 1;
                 end
                 `BNE : begin
-                   //$write("#BNE %x %x %x\n", branch_datax_in, branch_datay_in, jump);
                     dest_out <= branch_datax_in != branch_datay_in ? jump : remain;
                     en <= 1;
                 end

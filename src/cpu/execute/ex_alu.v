@@ -36,7 +36,6 @@ assign alu_tagw_out  = alu_tagw_in;
 always @(posedge clk) begin
     if (rdy) begin
         if (alu_busy_in && alu_tagx_in == `UNLOCKED && alu_tagy_in == `UNLOCKED && alu_tagw_in == `UNLOCKED) begin
-            //$write("EXE PC:%x OP:%x TAR:%x\n", pc_in, alu_op_in, alu_target_in);
             en <= 1;
             alu_busy_out <= 0;
             target_out <= alu_target_in;
@@ -45,7 +44,6 @@ always @(posedge clk) begin
                 en_jmp <= 0; 
                 jmp_addr <= `ZERO; 
                 data_out <= $signed(alu_datax_in) + $signed(alu_datay_in);
-                //$write("ADD: pc: %x x:%x y:%x z:%x\n", pc_in, alu_datax_in, alu_datay_in, $signed(alu_datax_in) + $signed(alu_datay_in));        
             end
             `SUB  : begin 
                 en_jmp <= 0; 

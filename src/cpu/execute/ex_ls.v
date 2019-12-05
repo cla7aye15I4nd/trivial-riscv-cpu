@@ -100,7 +100,6 @@ always @(posedge clk) begin
                 `LW: begin
                     if (finish && in_fifo) begin
                         data_out    <= {ls_data_in[7 : 0], ls_data_in[15 : 8], ls_data_in[23 : 16], ls_data_in[31 : 24]};
-                        //$write("## %x\n", {ls_data_in[7 : 0], ls_data_in[15 : 8], ls_data_in[24 : 16], ls_data_in[31 : 24]});
                         ls_busy_out <= 0;
                         ls_addr     <= `NULL_PTR;
                         en <= 1;
@@ -123,7 +122,6 @@ always @(posedge clk) begin
                 end
                 `LBU: begin
                     if (finish && in_fifo) begin
-                        //$write("LBU: %x %x addr:%x data:%x\n", ls_datax_in, ls_datay_in, ls_datax_in + ls_datay_in, $unsigned(ls_data_in[7 : 0]));
                         data_out    <= $unsigned(ls_data_in[7 : 0]);
                         ls_busy_out <= 0;
                         ls_addr     <= `NULL_PTR;
@@ -174,7 +172,6 @@ always @(posedge clk) begin
                         ls_busy_out <= 0;
                         en          <= 0;
                         en_ls       <= 0;
-                        // $write("SB: %x %x %x addr:%x data:%x\n", ls_datax_in, ls_datay_in, offset_in, ls_datax_in + offset_in, ls_datay_in);
                     end else begin
                         en <= 0;
                         en_ls   <= 1;
