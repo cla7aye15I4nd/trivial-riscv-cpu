@@ -97,7 +97,6 @@ always @(negedge clk) begin
                             instx_out <= `OP_NOP;
                         end else begin
                             instx_out <=  `REV(instx);
-                            //$write("%x %x\n", pcx, `REV(instx));
                             //predict   <= is_branch0 ? pcx + 4 : `ZERO;
                             branch_mode <= is_branch0 ? 1: 0;
                         end
