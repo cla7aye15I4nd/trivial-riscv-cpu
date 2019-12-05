@@ -1,4 +1,3 @@
-
 `include "riscv_top.v"
 `timescale 1ns/1ps  
 
@@ -18,7 +17,7 @@ module cpu_tb();
     initial begin
         btn = 1;
         #200 btn = 0;
-        #20000 $finish;
+        #200000 $finish;
     end
 
     riscv_top #(.SIM(1))riscv_top_instance (
