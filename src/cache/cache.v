@@ -1,11 +1,11 @@
-`define REFETCH                                             \
-    if (data_addr != `NULL_PTR) begin                       \
-        mode <= data_oper == 0 ? 2'b00: 2'b01;              \   
-        addr <= data_addr;                                  \
-        size <= data_size;                                  \
-        data <= data_oper == 0 ? `ZERO: data_data[31 : 8];  \
-        r_nw_out  <= data_oper ? `WRITE_SIGNAL : `READ_SIGNAL;\
-        data_out  <= data_oper ? data_data[7 : 0]: 0; \
+`define REFETCH                                                         \
+    if (data_addr != `NULL_PTR) begin                                   \
+        mode <= data_oper == `READ_SIGNAL ? 2'b00: 2'b01;               \   
+        addr <= data_addr;                                              \
+        size <= data_size;                                              \
+        data <= data_oper == `READ_SIGNAL ? `ZERO: data_data[31 : 8];   \
+        r_nw_out  <= data_oper == `WRITE_SIGNAL? `WRITE_SIGNAL : `READ_SIGNAL;\
+        data_out  <= data_oper == `WRITE_SIGNAL? data_data[7 : 0]: 0;   \
         addr_out  <= data_addr;                             \
         data_addr <= `NULL_PTR; /* warning */               \
     end else if (instx_addr != `NULL_PTR) begin             \
@@ -31,6 +31,7 @@
         addr <= `NULL_PTR;                                  \
         data <= `ZERO;                                      \
         addr_out <= `ZERO;                                  \
+        r_nw_out   <= `READ_SIGNAL;                         \
     end
 
 // TODO : STORE BUG
@@ -210,7 +211,7 @@ always @(negedge clk) begin
                     ls_data_out <= {data, mem_data};
                     finish <= 1;
                 end else begin
-                    finish <= 1;
+                    finish <= 0;
                 end
 
                 // Fetch new addr
