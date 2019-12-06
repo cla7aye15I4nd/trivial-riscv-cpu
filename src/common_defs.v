@@ -16,8 +16,8 @@
 `define regaddr_t       [`REG_ADDR_WIDTH - 1: 0]
 
 /* signal */
-`define READ_SIGNAL     1'b0
-`define WRITE_SIGNAL    1'b1
+`define READ_SIGNAL     0
+`define WRITE_SIGNAL    1
 
 /* constant */
 `define ZERO 32'h00000000
