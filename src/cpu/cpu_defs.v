@@ -60,12 +60,14 @@
 `define OP_NOP      8'b1111_1111
 
 /* Register tag */
-`define ALU_CNT         2
+`define ALU_CNT         4
 `define BRANCH_CNT      1
 `define LS_CNT          1
 
 `define ALU_MASTER      3'b000
 `define ALU_SALVER      3'b001
+`define ALU_SAKURA      3'b010
+`define ALU_MISAKA      3'b011
 `define BRANCH_SEL      3'b100
 `define LOAD_STORE      3'b101
 `define FAIL            3'b111
