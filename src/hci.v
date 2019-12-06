@@ -247,7 +247,7 @@ always @*
               d_tx_data = 8'h00;
               d_wr_en = 1'b1;
             end
-            $display("IO:Return");
+            $display("RUNTIME : ", $realtime, "s");
             $finish;
           end
         endcase
