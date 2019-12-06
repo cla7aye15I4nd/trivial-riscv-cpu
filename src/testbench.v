@@ -1,7 +1,7 @@
 // testbench top module file
 // for simulation only
 `include "riscv_top.v"
-`timescale 1ns/1ps
+`timescale 1ns/100ps
 module testbench;
 
 reg clk;
