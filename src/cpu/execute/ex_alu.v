@@ -12,9 +12,6 @@ module ex_alu(
 
     // to alloctor
     output reg alu_busy_out,
-    output wire `regtag_t alu_tagx_out,
-    output wire `regtag_t alu_tagy_out,
-    output wire `regtag_t alu_tagw_out,
     
     // to regfile
     output reg en, 
@@ -28,10 +25,6 @@ module ex_alu(
     input wire clk,
     input wire rdy
 );
-
-assign alu_tagx_out  = alu_tagx_in;
-assign alu_tagy_out  = alu_tagy_in;
-assign alu_tagw_out  = alu_tagw_in;
 
 always @(posedge clk) begin
     if (rdy) begin

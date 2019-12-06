@@ -11,9 +11,6 @@ module ex_ls(
 
     // to alloctor
     output reg ls_busy_out,
-    output wire `regtag_t ls_tagx_out,
-    output wire `regtag_t ls_tagy_out,
-    output wire `regtag_t ls_tagw_out,
     
     // to regfile
     output reg en,
@@ -35,10 +32,6 @@ module ex_ls(
     input wire rst,
     input wire rdy
 );
-
-assign ls_tagx_out  = ls_tagx_in;
-assign ls_tagy_out  = ls_tagy_in;
-assign ls_tagw_out  = ls_tagw_in;
 
 reg in_fifo;
 

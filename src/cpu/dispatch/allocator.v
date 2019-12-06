@@ -176,7 +176,7 @@ always @(negedge clk) begin
         en_mod0 <= 0;
         reg_addr0 <= 0;
         reg_tag0 <= `UNLOCKED;
-        if (branch_busy_in == 0 /*|| {branch_busy_in, branch_tagx_in, branch_tagy_in} == {1'b1, {2{`UNLOCKED}}}*/) begin
+        if (branch_busy_in == 0) begin
             issue0              <= 1;
             branch_op_out       <= op0_in[3 : 0];
             branch_pc_out       <= pc0_in;

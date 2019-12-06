@@ -17,9 +17,10 @@ module reg_stat(
     `WRITE_VAR_DEFINE(en_w1, reg_write_addr1, write_data1)
     `WRITE_VAR_DEFINE(en_w2, reg_write_addr2, write_data2)
 
-    `WRITE_TAG_DEFINE(en_mod0, reg_addr0, reg_tag0)
+    input wire en_mod0,
+    input wire `regtag_t reg_tag0,
+    input wire `regaddr_t reg_addr0,
     // `WRITE_TAG_DEFINE(en_mod1, reg_addr1, reg_tag1)
-    // `WRITE_TAG_DEFINE(en_mod2, reg_addr2, reg_tag2)
 
     input wire clk,
     input wire rst,
@@ -29,11 +30,6 @@ module reg_stat(
 integer i;
 reg `word_t data[0 : `REG_COUNT-1];
 reg `regtag_t tag[0 : `REG_COUNT-1];
-
-wire `regtag_t tagdebug;
-wire `word_t datadebug;
-assign tagdebug = tag[15];
-assign datadebug = data[15];
 
 assign datax0 = en_rx0 ? data[addrx0]: imm0;
 assign datay0 = en_ry0 ? data[addry0]: imm0;

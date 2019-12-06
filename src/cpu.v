@@ -195,10 +195,6 @@ wire `regaddr_t alloc_addrw0, alloc_addrw1, alloc_ls_addrw;
 
 // ALU / LS / Branch
 wire alu0_busy_upd, alu1_busy_upd, ls_busy_upd, branch_busy_upd;
-wire `regtag_t alu0_tagx_upd, alu0_tagy_upd, alu0_tagw_upd;
-wire `regtag_t alu1_tagx_upd, alu1_tagy_upd, alu1_tagw_upd;
-wire `regtag_t ls_tagx_upd, ls_tagy_upd, ls_tagw_upd;
-wire `regtag_t branch_tagx_upd, branch_tagy_upd;
 wire `addr_t alu0_pc_in, alu1_pc_in, branch_pc_in;
 wire `word_t alloc_branch_offset, alloc_ls_offset;
 wire alu0_next_busy, alu1_next_busy, ls_next_busy, branch_next_busy;
@@ -327,9 +323,6 @@ ex_alu ex_alu_master(
   .alu_datax_in(alu0_datax_in), .alu_datay_in(alu0_datay_in), .alu_target_in(alu0_target_in),
 
   .alu_busy_out(alu0_busy_upd),
-  .alu_tagx_out(alu0_tagx_upd), 
-  .alu_tagy_out(alu0_tagy_upd), 
-  .alu_tagw_out(alu0_tagw_upd),
 
   .en(regs_enw0), .target_out(regs_waddr0), .data_out(regs_wdata0),
 
@@ -344,9 +337,6 @@ ex_alu ex_alu_salver(
   .alu_datax_in(alu1_datax_in), .alu_datay_in(alu1_datay_in), .alu_target_in(alu1_target_in),
 
   .alu_busy_out(alu1_busy_upd),
-  .alu_tagx_out(alu1_tagx_upd), 
-  .alu_tagy_out(alu1_tagy_upd), 
-  .alu_tagw_out(alu1_tagw_upd),
 
   .en(regs_enw1), .target_out(regs_waddr1), .data_out(regs_wdata1),
 
@@ -360,9 +350,6 @@ ex_ls ex_ls_instance(
   .ls_datax_in(ls_datax_in), .ls_datay_in(ls_datay_in), .ls_target_in(ls_target_in),
 
   .ls_busy_out(ls_busy_upd),
-  .ls_tagx_out(ls_tagx_upd), 
-  .ls_tagy_out(ls_tagy_upd), 
-  .ls_tagw_out(ls_tagw_upd),
 
   .en(regs_enw2), .target_out(regs_waddr2), .data_out(regs_wdata2),
 
@@ -386,8 +373,6 @@ ex_branch ex_branch_instance(
   .branch_datax_in(branch_datax_in), .branch_datay_in(branch_datay_in),
 
   .branch_busy_out(branch_busy_upd), 
-  .branch_tagx_out(branch_tagx_upd),
-  .branch_tagy_out(branch_tagy_upd),
 
   .en(en_branch), .dest_out(result), 
   .clk(clk_in), .rdy(rdy_in)

@@ -53,13 +53,12 @@ assign pcy_out = pcy;
 // JUMP
 assign en_jmp = en_jmp0 | en_jmp1;
 assign jmp_addr = en_jmp0 ? jmp_addr0: jmp_addr1;
-assign is_jmp0 = ~branch_mode && ~jmp_stall && hitx && (instx[30 : 24] == 7'b1101111 || (instx[30 : 24] == 7'b1100111 && instx[22 : 20] == 3'b000)) ? 1 : 0;
-assign is_jmp1 = ~branch_mode && ~jmp_stall && hity && (insty[30 : 24] == 7'b1101111 || (insty[30 : 24] == 7'b1100111 && insty[22 : 20] == 3'b000)) ? 1 : 0;
+assign is_jmp0 = ~branch_mode && ~jmp_stall && hitx && (instx[30 : 24] == 7'b1101111 || (instx[30 : 24] == 7'b1100111 && instx[22 : 20] == 3'b000));
+assign is_jmp1 = ~branch_mode && ~jmp_stall && hity && (insty[30 : 24] == 7'b1101111 || (insty[30 : 24] == 7'b1100111 && insty[22 : 20] == 3'b000));
 
 // BRANCH
 assign is_branch0 = hitx && instx[30 : 24] == 7'b1100011;
 assign is_branch1 = hity && insty[30 : 24] == 7'b1100011;
-// assign offset0 = {instx[]};
 
 `define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
 

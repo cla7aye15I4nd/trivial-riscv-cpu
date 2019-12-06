@@ -10,8 +10,6 @@ module ex_branch(
 
     // to alloctor
     output wire branch_busy_out,
-    output wire `regtag_t branch_tagx_out,
-    output wire `regtag_t branch_tagy_out,
     
     // to if
     // input wire `word_t predict,
@@ -22,8 +20,6 @@ module ex_branch(
     input wire rdy
 );
 
-assign branch_tagx_out  = branch_tagx_in;
-assign branch_tagy_out  = branch_tagy_in;
 assign branch_busy_out = (
                         branch_busy_in == 0 || 
                         (

@@ -1,7 +1,7 @@
 module rs_alu(
     // Allocator Input
-    input wire `addr_t pc0,
     input wire en0,
+    input wire `addr_t pc0,
     input wire `sinst_t op0,
     input wire `regtag_t tagx0,
     input wire `regtag_t tagy0,
@@ -10,8 +10,8 @@ module rs_alu(
     input wire `word_t datay0,
     input wire `regaddr_t addrw0,
 
-    input wire `addr_t pc1,
     input wire en1,
+    input wire `addr_t pc1,
     input wire `sinst_t op1,
     input wire `regtag_t tagx1,
     input wire `regtag_t tagy1,
@@ -116,7 +116,7 @@ always @(negedge clk) begin
     if (rst) begin
         for (i = 0; i < `ALU_CNT; i = i + 1) begin
             {busy[i], pc[i], op[i], data_rx[i], data_ry[i], target[i]} <= 0;
-            {tag_rx[i], tag_ry[i], tag_w[i]} <= {`UNLOCKED, `UNLOCKED, `UNLOCKED};
+            {tag_rx[i], tag_ry[i], tag_w[i]} <= {3{`UNLOCKED}};
         end
     end else if (rdy) begin
         /* Input instruction exist, update by input or origin value */
@@ -129,7 +129,7 @@ always @(negedge clk) begin
             `UPDATE_PAIR(tag_ry[0], data_ry[0], tagy0, datay0)
             `UPDATE_VAR(tag_w[0], tagw0)
             target[0] <= addrw0;
-        end else /*if (busy[0])*/ begin
+        end else begin
             alu0_next_busy <= busy_alu0;
             busy[0] <= busy_alu0;
             `UPDATE_PAIR(tag_rx[0], data_rx[0], tag_rx[0], data_rx[0])
