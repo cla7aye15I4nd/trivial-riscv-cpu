@@ -36,10 +36,6 @@ module rs_ls(
     output wire `word_t ls_datay_out,
     output wire `regaddr_t ls_target_out,
 
-    // output reg enw2,
-    // output reg `regaddr_t regaddr2,
-    // output reg `regtag_t  regtag2,
-
     input wire clk,
     input wire rdy,
     input wire rst

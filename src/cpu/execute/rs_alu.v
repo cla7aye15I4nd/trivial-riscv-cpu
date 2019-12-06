@@ -34,8 +34,7 @@ module rs_alu(
     input wire `word_t ls_data,
     
     output reg alu0_next_busy,
-    // output reg alu0_next_tagx,
-    // output reg alu0_next_tagy,
+    output reg alu1_next_busy,
 
     // Output to alu execuator
     output wire `addr_t alu_pc0_out,
@@ -97,11 +96,19 @@ integer i;
 
 always @(posedge clk) begin
     if (en0) begin
-        alu0_next_busy <= 1;
+        alu0_next_busy <=1;
     end else if (busy[0]) begin
         alu0_next_busy <= {tag_rx[0], tag_ry[0], tag_w[0]} == {3{`UNLOCKED}} ? 0: 1;
     end else begin
         alu0_next_busy <= 0;
+    end
+
+    if (en1) begin
+        alu1_next_busy <= 1;
+    end else if (busy[1]) begin
+        alu1_next_busy <= {tag_rx[1], tag_ry[1], tag_w[1]} == {3{`UNLOCKED}} ? 0: 1;
+    end else begin
+        alu1_next_busy <= 0;
     end
 end
 
@@ -114,7 +121,6 @@ always @(negedge clk) begin
     end else if (rdy) begin
         /* Input instruction exist, update by input or origin value */
         if (en0) begin
-            if (busy_alu0) $display("ERROR");
             alu0_next_busy <= 1;    
             busy[0] <= 1;
             op[0] <= op0;

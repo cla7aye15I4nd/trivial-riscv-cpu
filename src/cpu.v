@@ -178,7 +178,6 @@ reg_stat reg_stat_instance(
 
   .en_mod0(mod_enw0), .reg_addr0(mod_addr0), .reg_tag0(mod_tag0),
   // .en_mod1(mod_enw1), .reg_addr1(mod_addr1), .reg_tag1(mod_tag1),
-  // .en_mod2(mod_enw2), .reg_addr2(mod_addr2), .reg_tag2(mod_tag2),
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
@@ -202,23 +201,25 @@ wire `regtag_t ls_tagx_upd, ls_tagy_upd, ls_tagw_upd;
 wire `regtag_t branch_tagx_upd, branch_tagy_upd;
 wire `addr_t alu0_pc_in, alu1_pc_in, branch_pc_in;
 wire `word_t alloc_branch_offset, alloc_ls_offset;
-wire alu0_next_busy, ls_next_busy, branch_next_busy;
+wire alu0_next_busy, alu1_next_busy, ls_next_busy, branch_next_busy;
+wire `regtag_t alu0_next_tagx, alu0_next_tagy, alu0_next_tagw;
+wire `regtag_t alu1_next_tagx, alu1_next_tagy, alu1_next_tagw;
 
 allocator allocator_instance(
   .op0_in(op0), .pc0_in(alloc_pc0), 
   .imm0_in(imm0), .datax0_in(read_datax0), .datay0_in(read_datay0),
   .tagx0_in(read_lockx0), .tagy0_in(read_locky0), .tagw0_in(write_lock0),
-  .addrx0_in(reg_read_addrx0), .addry0_in(reg_read_addry0), .addrw0_in(reg_write_addr0),
+  .addrw0_in(reg_write_addr0),
 
   .op1_in(op1), .pc1_in(alloc_pc1), 
   .imm1_in(imm1), .datax1_in(read_datax1), .datay1_in(read_datay1),
   .tagx1_in(read_lockx1), .tagy1_in(read_locky1), .tagw1_in(write_lock1),
-  .addrx1_in(reg_read_addrx1), .addry1_in(reg_read_addry1), .addrw1_in(reg_write_addr1),
+  .addrw1_in(reg_write_addr1),
 
-  .alu0_busy_in(alu0_next_busy), .alu0_tagx_in(alu0_tagx_in), .alu0_tagy_in(alu0_tagy_in), .alu0_tagw_in(alu0_tagw_in), 
-  .alu1_busy_in(alu1_busy_in), .alu1_tagx_in(alu1_tagx_in), .alu1_tagy_in(alu1_tagy_in), .alu1_tagw_in(alu1_tagw_in),
-  .ls_busy_in(ls_next_busy), .ls_tagx_in(ls_tagx_in), .ls_tagy_in(ls_tagy_in), .ls_tagw_in(ls_tagw_in),
-  .branch_busy_in(branch_next_busy), .branch_tagx_in(branch_tagx_in), .branch_tagy_in(branch_tagy_in),
+  .alu0_busy_in(alu0_next_busy), 
+  .alu1_busy_in(alu1_next_busy), 
+  .ls_busy_in(ls_next_busy), 
+  .branch_busy_in(branch_next_busy),
 
   .alu0_pc_out(alu0_pc_in), .alu0_en_out(alloc_en0), .alu0_op_out(alloc_op0), 
   .alu0_tagx_out(alloc_tagx0), .alu0_tagy_out(alloc_tagy0), .alu0_tagw_out(alloc_tagw0),
@@ -265,7 +266,8 @@ rs_alu rs_alu_instance(
   .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
 
   .alu0_next_busy(alu0_next_busy),
-
+  .alu1_next_busy(alu1_next_busy),
+  
   .alu_pc0_out(alu0_pc_out),
   .alu_busy0_out(alu0_busy_in), .alu_op0_out(alu0_op_in),
   .alu_tagx0_out(alu0_tagx_in), .alu_tagy0_out(alu0_tagy_in), .alu_tagw0_out(alu0_tagw_in),
@@ -275,9 +277,6 @@ rs_alu rs_alu_instance(
   .alu_busy1_out(alu1_busy_in), .alu_op1_out(alu1_op_in),
   .alu_tagx1_out(alu1_tagx_in), .alu_tagy1_out(alu1_tagy_in), .alu_tagw1_out(alu1_tagw_in),
   .alu_datax1_out(alu1_datax_in), .alu_datay1_out(alu1_datay_in), .alu_target1_out(alu1_target_in),
-
-  // .enw0(mod_enw0), .regaddr0(mod_addr0), .regtag0(mod_tag0), 
-  // .enw1(mod_enw1), .regaddr1(mod_addr1), .regtag1(mod_tag1), 
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
