@@ -31,7 +31,9 @@ reg `word_t data[0 : `REG_COUNT-1];
 reg `regtag_t tag[0 : `REG_COUNT-1];
 
 wire `regtag_t tagdebug;
-assign tagdebug = tag[14];
+wire `word_t datadebug;
+assign tagdebug = tag[15];
+assign datadebug = data[15];
 
 assign datax0 = en_rx0 ? data[addrx0]: imm0;
 assign datay0 = en_ry0 ? data[addry0]: imm0;
@@ -55,21 +57,21 @@ always @(posedge clk) begin
         if (en_mod0 && reg_addr0 > 0) tag[reg_addr0] <= reg_tag0;
         // if (en_mod1 && reg_addr1 > 0) tag[reg_addr1] <= reg_tag1;
         
-        if (en_w0 && reg_write_addr0 > 0
+        if (en_w0 && reg_write_addr0 > 0 && tag[reg_write_addr0] == `ALU_MASTER 
             && (~en_mod0 || reg_write_addr0 != reg_addr0)
             //&& (~en_mod1 || reg_write_addr0 != reg_addr1)
             ) begin
             {data[reg_write_addr0], tag[reg_write_addr0]} <= {write_data0, `UNLOCKED};
         end
 
-        if (en_w1 && reg_write_addr1 > 0
+        if (en_w1 && reg_write_addr1 > 0 && tag[reg_write_addr1] == `ALU_SALVER
             && (~en_mod0 || reg_write_addr1 != reg_addr0)
             //&& (~en_mod1 || reg_write_addr1 != reg_addr1)
             ) begin
             {data[reg_write_addr1], tag[reg_write_addr1]} <= {write_data1, `UNLOCKED};
         end
 
-        if (en_w2 && reg_write_addr2 > 0
+        if (en_w2 && reg_write_addr2 > 0 && tag[reg_write_addr2] == `LOAD_STORE
             && (~en_mod0 || reg_write_addr2 != reg_addr0)
             //&& (~en_mod1 || reg_write_addr2 != reg_addr1)
             ) begin
