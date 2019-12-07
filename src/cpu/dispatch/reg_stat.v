@@ -49,7 +49,7 @@ always @(posedge clk) begin
             data[i] <= `ZERO;
             tag[i] <= `UNLOCKED;
         end
-    end else if(rdy) begin
+    end else /*if(rdy)*/ begin
         if (en_mod0 && reg_addr0 > 0) tag[reg_addr0] <= reg_tag0;
         // if (en_mod1 && reg_addr1 > 0) tag[reg_addr1] <= reg_tag1;
         

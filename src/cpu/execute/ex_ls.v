@@ -40,7 +40,7 @@ always @(posedge clk) begin
     if (rst) begin
         in_fifo <= 0;
         ls_busy_out <= 0;
-    end else if(rdy) begin
+    end else /*if(rdy)*/ begin
         if (ls_busy_in && ls_tagx_in == `UNLOCKED && ls_tagy_in == `UNLOCKED && ls_tagw_in == `UNLOCKED) begin
             target_out <= ls_target_in;
             case (ls_op_in)

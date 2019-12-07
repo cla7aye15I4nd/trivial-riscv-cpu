@@ -69,7 +69,7 @@ always @(negedge clk) begin
     if (rst) begin
         {busy, op_ls, target, data_rx, data_ry} = 0;
         {tag_rx, tag_ry, tag_w} = {`UNLOCKED, `UNLOCKED, `UNLOCKED};
-    end else if (rdy) begin
+    end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
         if (en) begin
             busy <= 1;

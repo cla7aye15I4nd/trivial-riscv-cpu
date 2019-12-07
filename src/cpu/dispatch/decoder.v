@@ -72,7 +72,7 @@ always @(posedge clk) begin
     if (rst) begin
         pc <= `ZERO;
         inst <= `ZERO;
-    end else if(rdy) begin
+    end else /*if(rdy)*/ begin
         if (issue) begin
             if (hit) begin
                 pc <= pc_in;
@@ -86,78 +86,76 @@ always @(posedge clk) begin
 end
 
 always @(*) begin
-    if (rdy) begin
-        pc_out = pc;
-        case (inst[6 : 0]) // optype
-            `I_TYPE, `L_TYPE: begin
-                op  = op_i;
-                imm = imm_i;
-                `SET_SIGNAL(1, 0, 1);
-                reg_read_addrx = reg_read_addry_i;
-                reg_read_addry = `ZERO;
-                reg_write_addr = reg_write_addr_i;
-            end
-            `R_TYPE: begin
-                op  = op_r;
-                `SET_SIGNAL(1, 1, 1);
-                reg_read_addrx = reg_read_addrx_r;
-                reg_read_addry = reg_read_addry_r;
-                reg_write_addr = reg_write_addr_r;
-            end
-            `S_TYPE: begin
-                op  = op_s;
-                imm = imm_s;
-                `SET_SIGNAL(1, 1, 0);
-                reg_read_addrx = reg_read_addrx_s;
-                reg_read_addry = reg_read_addry_s;
-                reg_write_addr = `ZERO;
-            end
-            `B_TYPE: begin
-                op  = op_b;
-                imm = imm_b;
-                `SET_SIGNAL(1, 1, 0);
-                reg_read_addrx = reg_read_addrx_b;
-                reg_read_addry = reg_read_addry_b;
-                reg_write_addr = `ZERO;
-            end
-            7'b0110111: begin //LUI
-                op = `OP_LUI;
-                imm = {inst[31 : 12], {12{1'b0}}};
-                reg_read_addrx = `ZERO;
-                reg_read_addry = `ZERO;
-                reg_write_addr = inst[11 : 7];
-                `SET_SIGNAL(0, 0, 1);
-            end
-            7'b0010111: begin //AUIPC
-                op = `OP_AUIPC;
-                imm = {inst[31 : 12], {12{1'b0}}};
-                reg_read_addrx = `ZERO;
-                reg_read_addry = `ZERO;
-                reg_write_addr = inst[11 : 7];
-                `SET_SIGNAL(0, 0, 1);
-            end
-            7'b1101111: begin //JAL
-                op = `OP_JAL;
-                imm = $signed({inst[31 : 31], inst[19 : 12], inst[20 : 20], inst[30: 21], 1'b0});
-                reg_read_addrx = `ZERO;
-                reg_read_addry = `ZERO;
-                reg_write_addr = inst[11 : 7];
-                `SET_SIGNAL(0, 0, 1);
-            end
-            7'b1100111: begin //JALR
-                op = `OP_JALR;
-                imm = $signed(inst[31 : 20]);
-                reg_read_addrx = `ZERO;
-                reg_read_addry = inst[19 : 15];
-                reg_write_addr = inst[11 : 7];
-                `SET_SIGNAL(0, 1, 1);
-            end
-            default: begin
-                op = `OP_NOP;
-                `SET_SIGNAL(0, 0, 0);
-            end
-        endcase
-    end
+    pc_out = pc;
+    case (inst[6 : 0]) // optype
+        `I_TYPE, `L_TYPE: begin
+            op  = op_i;
+            imm = imm_i;
+            `SET_SIGNAL(1, 0, 1);
+            reg_read_addrx = reg_read_addry_i;
+            reg_read_addry = `ZERO;
+            reg_write_addr = reg_write_addr_i;
+        end
+        `R_TYPE: begin
+            op  = op_r;
+            `SET_SIGNAL(1, 1, 1);
+            reg_read_addrx = reg_read_addrx_r;
+            reg_read_addry = reg_read_addry_r;
+            reg_write_addr = reg_write_addr_r;
+        end
+        `S_TYPE: begin
+            op  = op_s;
+            imm = imm_s;
+            `SET_SIGNAL(1, 1, 0);
+            reg_read_addrx = reg_read_addrx_s;
+            reg_read_addry = reg_read_addry_s;
+            reg_write_addr = `ZERO;
+        end
+        `B_TYPE: begin
+            op  = op_b;
+            imm = imm_b;
+            `SET_SIGNAL(1, 1, 0);
+            reg_read_addrx = reg_read_addrx_b;
+            reg_read_addry = reg_read_addry_b;
+            reg_write_addr = `ZERO;
+        end
+        7'b0110111: begin //LUI
+            op = `OP_LUI;
+            imm = {inst[31 : 12], {12{1'b0}}};
+            reg_read_addrx = `ZERO;
+            reg_read_addry = `ZERO;
+            reg_write_addr = inst[11 : 7];
+            `SET_SIGNAL(0, 0, 1);
+        end
+        7'b0010111: begin //AUIPC
+            op = `OP_AUIPC;
+            imm = {inst[31 : 12], {12{1'b0}}};
+            reg_read_addrx = `ZERO;
+            reg_read_addry = `ZERO;
+            reg_write_addr = inst[11 : 7];
+            `SET_SIGNAL(0, 0, 1);
+        end
+        7'b1101111: begin //JAL
+            op = `OP_JAL;
+            imm = $signed({inst[31 : 31], inst[19 : 12], inst[20 : 20], inst[30: 21], 1'b0});
+            reg_read_addrx = `ZERO;
+            reg_read_addry = `ZERO;
+            reg_write_addr = inst[11 : 7];
+            `SET_SIGNAL(0, 0, 1);
+        end
+        7'b1100111: begin //JALR
+            op = `OP_JALR;
+            imm = $signed(inst[31 : 20]);
+            reg_read_addrx = `ZERO;
+            reg_read_addry = inst[19 : 15];
+            reg_write_addr = inst[11 : 7];
+            `SET_SIGNAL(0, 1, 1);
+        end
+        default: begin
+            op = `OP_NOP;
+            `SET_SIGNAL(0, 0, 0);
+        end
+    endcase
 end
 
 endmodule // decoder

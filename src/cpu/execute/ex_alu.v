@@ -27,95 +27,93 @@ module ex_alu(
 );
 
 always @(posedge clk) begin
-    if (rdy) begin
-        if (alu_busy_in && alu_tagx_in == `UNLOCKED && alu_tagy_in == `UNLOCKED && alu_tagw_in == `UNLOCKED) begin
-            en <= 1;
-            alu_busy_out <= 0;
-            target_out <= alu_target_in;
-            case (alu_op_in)
-            `ADD  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) + $signed(alu_datay_in);
-            end
-            `SUB  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) - $signed(alu_datay_in);        
-            end
-            `SLL  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= alu_datax_in << alu_datay_in[4 : 0];          
-            end
-            `SLT  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) < $signed(alu_datay_in) ? 1 : 0;
-            end
-            `SLTU : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= alu_datax_in < alu_datay_in ? 1 : 0;
-            end
-            `XOR  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) ^ $signed(alu_datay_in);        
-            end
-            `SRL  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= alu_datax_in >> alu_datay_in[4 : 0];          
-            end
-            `SRA  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) >>> alu_datay_in[4 : 0];          
-            end
-            `OR   : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) | $signed(alu_datay_in);        
-            end
-            `AND  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= $signed(alu_datax_in) & $signed(alu_datay_in);        
-            end
-            `LUI  : begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= alu_datax_in;                                           
-            end
-            `AUIPC: begin 
-                en_jmp <= 0; 
-                jmp_addr <= `ZERO; 
-                data_out <= alu_datax_in + pc_in;                                   
-            end
-            `JAL  : begin
-                en_jmp <= 1;
-                data_out <= pc_in + 4;
-                jmp_addr <= pc_in + alu_datax_in;
-            end
-            `JALR : begin
-                en_jmp <= 1;
-                data_out <= pc_in + 4;
-                jmp_addr <= (alu_datax_in + alu_datay_in) & 32'hfffffffe;
-            end
-            default : begin 
-                en_jmp <= 0;
-                data_out <= `ZERO;
-                jmp_addr <= `ZERO;
-            end
-            endcase
-        end else begin
-            en <= 0;
+    if (alu_busy_in && alu_tagx_in == `UNLOCKED && alu_tagy_in == `UNLOCKED && alu_tagw_in == `UNLOCKED) begin
+        en <= 1;
+        alu_busy_out <= 0;
+        target_out <= alu_target_in;
+        case (alu_op_in)
+        `ADD  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) + $signed(alu_datay_in);
+        end
+        `SUB  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) - $signed(alu_datay_in);        
+        end
+        `SLL  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= alu_datax_in << alu_datay_in[4 : 0];          
+        end
+        `SLT  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) < $signed(alu_datay_in) ? 1 : 0;
+        end
+        `SLTU : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= alu_datax_in < alu_datay_in ? 1 : 0;
+        end
+        `XOR  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) ^ $signed(alu_datay_in);        
+        end
+        `SRL  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= alu_datax_in >> alu_datay_in[4 : 0];          
+        end
+        `SRA  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) >>> alu_datay_in[4 : 0];          
+        end
+        `OR   : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) | $signed(alu_datay_in);        
+        end
+        `AND  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= $signed(alu_datax_in) & $signed(alu_datay_in);        
+        end
+        `LUI  : begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= alu_datax_in;                                           
+        end
+        `AUIPC: begin 
+            en_jmp <= 0; 
+            jmp_addr <= `ZERO; 
+            data_out <= alu_datax_in + pc_in;                                   
+        end
+        `JAL  : begin
+            en_jmp <= 1;
+            data_out <= pc_in + 4;
+            jmp_addr <= pc_in + alu_datax_in;
+        end
+        `JALR : begin
+            en_jmp <= 1;
+            data_out <= pc_in + 4;
+            jmp_addr <= (alu_datax_in + alu_datay_in) & 32'hfffffffe;
+        end
+        default : begin 
             en_jmp <= 0;
             data_out <= `ZERO;
-            alu_busy_out <= alu_busy_in;
-            target_out <= `ZERO;
+            jmp_addr <= `ZERO;
         end
+        endcase
+    end else begin
+        en <= 0;
+        en_jmp <= 0;
+        data_out <= `ZERO;
+        alu_busy_out <= alu_busy_in;
+        target_out <= `ZERO;
     end
 end
 

@@ -118,7 +118,7 @@ always @(negedge clk) begin
             {busy[i], pc[i], op[i], data_rx[i], data_ry[i], target[i]} <= 0;
             {tag_rx[i], tag_ry[i], tag_w[i]} <= {3{`UNLOCKED}};
         end
-    end else if (rdy) begin
+    end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
         if (en0) begin
             alu0_next_busy <= 1;    

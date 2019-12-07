@@ -68,7 +68,7 @@ always @(negedge clk) begin
         jmp_stall <= 0;
         pcx <= 0;
         pcy <= 4;
-    end else if (rdy) begin
+    end else /*if (rdy)*/begin
         if (en_branch) begin
             branch_mode <= 0;
             pc0_out <= result;
