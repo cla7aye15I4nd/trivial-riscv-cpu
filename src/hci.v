@@ -247,7 +247,7 @@ always @*
               d_tx_data = 8'h00;
               d_wr_en = 1'b1;
             end
-            $display("RUNTIME : ", $realtime, "s");
+            $write("runtime : %fs", $realtime);
             $finish;
           end
         endcase
