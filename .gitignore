@@ -54,3 +54,6 @@ src/*.gtkw
 
 #vscode
 .vscode
+
+#Vivado
+vivado/

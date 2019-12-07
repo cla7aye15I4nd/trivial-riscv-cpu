@@ -1,40 +1,5 @@
-`define REFETCH                                                         \
-    if (data_addr != `NULL_PTR) begin                                   \
-        mode <= data_oper == `READ_SIGNAL ? 2'b00: 2'b01;               \   
-        addr <= data_addr;                                              \
-        size <= data_size;                                              \
-        data <= data_oper == `READ_SIGNAL ? `ZERO: data_data[31 : 8];   \
-        r_nw_out  <= data_oper == `WRITE_SIGNAL? `WRITE_SIGNAL : `READ_SIGNAL;\
-        data_out  <= data_oper == `WRITE_SIGNAL? data_data[7 : 0]: 0;   \
-        addr_out  <= data_addr;                             \
-        data_addr <= `NULL_PTR; /* warning */               \
-    end else if (instx_addr != `NULL_PTR) begin             \
-        mode <= 2'b10;                                      \
-        addr <= instx_addr;                                 \
-        size <= 4;                                          \
-        data <= `ZERO;                                      \
-        r_nw_out   <= `READ_SIGNAL;                         \
-        addr_out   <= instx_addr;                           \
-        instx_addr <= `NULL_PTR; /* warning */              \
-        addr_index <= instx_addr[16 - TAG_WIDTH : 2];       \
-    end else if (insty_addr != `NULL_PTR) begin             \
-        mode <= 2'b10;                                      \
-        addr <= insty_addr;                                 \
-        size <= 4;                                          \
-        data <= `ZERO;                                      \
-        r_nw_out   <= `READ_SIGNAL;                         \
-        addr_out   <= insty_addr;                           \
-        instx_addr <= `NULL_PTR; /* warning */              \
-        addr_index <= insty_addr[16 - TAG_WIDTH : 2];       \
-    end else begin                                          \
-        mode <= 2'b11;                                      \
-        addr <= `NULL_PTR;                                  \
-        data <= `ZERO;                                      \
-        addr_out <= `ZERO;                                  \
-        r_nw_out   <= `READ_SIGNAL;                         \
-    end
+`timescale 1ns/1ps
 
-// TODO : STORE BUG
 module cache 
 #(
     parameter LINE_WIDTH  = 32,
@@ -87,11 +52,9 @@ reg [14 - TAG_WIDTH : 0] addr_index;
 // Instruction fetch
 assign pcx_tag = pcx[16 : 17 - TAG_WIDTH];
 assign pcy_tag = pcy[16 : 17 - TAG_WIDTH];
-assign data_tag= ls_addr[16 : 17 - TAG_WIDTH];
 
 assign pcx_index = pcx[16 - TAG_WIDTH : 2];
 assign pcy_index = pcy[16 - TAG_WIDTH : 2];
-assign data_index= ls_addr[16 - TAG_WIDTH : 2];
 
 // load / store
 reg `byte_t mode;
@@ -215,11 +178,79 @@ always @(negedge clk) begin
                 end
 
                 // Fetch new addr
-                `REFETCH
+                if (data_addr != `NULL_PTR) begin                                   
+                    mode <= data_oper == `READ_SIGNAL ? 2'b00: 2'b01;                  
+                    addr <= data_addr;                                              
+                    size <= data_size;                                              
+                    data <= data_oper == `READ_SIGNAL ? `ZERO: data_data[31 : 8];   
+                    r_nw_out  <= data_oper == `WRITE_SIGNAL? `WRITE_SIGNAL : `READ_SIGNAL;
+                    data_out  <= data_oper == `WRITE_SIGNAL? data_data[7 : 0]: 0;   
+                    addr_out  <= data_addr;                             
+                    data_addr <= `NULL_PTR; /* warning */               
+                end else if (instx_addr != `NULL_PTR) begin             
+                    mode <= 2'b10;                                      
+                    addr <= instx_addr;                                 
+                    size <= 4;                                          
+                    data <= `ZERO;                                      
+                    r_nw_out   <= `READ_SIGNAL;                         
+                    addr_out   <= instx_addr;                           
+                    instx_addr <= `NULL_PTR; /* warning */              
+                    addr_index <= instx_addr[16 - TAG_WIDTH : 2];       
+                end else if (insty_addr != `NULL_PTR) begin             
+                    mode <= 2'b10;                                      
+                    addr <= insty_addr;                                 
+                    size <= 4;                                          
+                    data <= `ZERO;                                      
+                    r_nw_out   <= `READ_SIGNAL;                         
+                    addr_out   <= insty_addr;                           
+                    instx_addr <= `NULL_PTR; /* warning */              
+                    addr_index <= insty_addr[16 - TAG_WIDTH : 2];       
+                end else begin                                          
+                    mode <= 2'b11;                                      
+                    addr <= `NULL_PTR;                                  
+                    data <= `ZERO;                                      
+                    addr_out <= `ZERO;                                  
+                    r_nw_out   <= `READ_SIGNAL;                         
+                end
+
             end
         end else begin
             counter <= 0;    
-            `REFETCH
+            if (data_addr != `NULL_PTR) begin                                   
+                mode <= data_oper == `READ_SIGNAL ? 2'b00: 2'b01;                  
+                addr <= data_addr;                                              
+                size <= data_size;                                              
+                data <= data_oper == `READ_SIGNAL ? `ZERO: data_data[31 : 8];   
+                r_nw_out  <= data_oper == `WRITE_SIGNAL? `WRITE_SIGNAL : `READ_SIGNAL;
+                data_out  <= data_oper == `WRITE_SIGNAL? data_data[7 : 0]: 0;   
+                addr_out  <= data_addr;                             
+                data_addr <= `NULL_PTR; /* warning */               
+            end else if (instx_addr != `NULL_PTR) begin             
+                mode <= 2'b10;                                      
+                addr <= instx_addr;                                 
+                size <= 4;                                          
+                data <= `ZERO;                                      
+                r_nw_out   <= `READ_SIGNAL;                         
+                addr_out   <= instx_addr;                           
+                instx_addr <= `NULL_PTR; /* warning */              
+                addr_index <= instx_addr[16 - TAG_WIDTH : 2];       
+            end else if (insty_addr != `NULL_PTR) begin             
+                mode <= 2'b10;                                      
+                addr <= insty_addr;                                 
+                size <= 4;                                          
+                data <= `ZERO;                                      
+                r_nw_out   <= `READ_SIGNAL;                         
+                addr_out   <= insty_addr;                           
+                instx_addr <= `NULL_PTR; /* warning */              
+                addr_index <= insty_addr[16 - TAG_WIDTH : 2];       
+            end else begin                                          
+                mode <= 2'b11;                                      
+                addr <= `NULL_PTR;                                  
+                data <= `ZERO;                                      
+                addr_out <= `ZERO;                                  
+                r_nw_out   <= `READ_SIGNAL;                         
+            end
+
         end
     end
 end

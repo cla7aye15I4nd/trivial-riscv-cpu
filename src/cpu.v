@@ -1,16 +1,3 @@
-`include "common_defs.v"
-`include "cpu/cpu_defs.v"
-`include "cpu/fetch/cpu_if.v"
-`include "cpu/dispatch/decoder.v"
-`include "cpu/dispatch/reg_stat.v"
-`include "cpu/dispatch/allocator.v"
-`include "cpu/execute/rs_alu.v"
-`include "cpu/execute/ex_alu.v"
-`include "cpu/execute/rs_ls.v"
-`include "cpu/execute/ex_ls.v"
-`include "cpu/execute/rs_branch.v"
-`include "cpu/execute/ex_branch.v"
-`include "cache/cache.v"
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
 

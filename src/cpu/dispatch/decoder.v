@@ -1,8 +1,3 @@
-`include "cpu/dispatch/decoder_type_i.v"
-`include "cpu/dispatch/decoder_type_r.v"
-`include "cpu/dispatch/decoder_type_b.v"
-`include "cpu/dispatch/decoder_type_s.v"
-
 `define SET_SIGNAL(x, y, z) \
     en_rx = x;             \
     en_ry = y;             \

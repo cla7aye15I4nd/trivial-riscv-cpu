@@ -1,0 +1,30 @@
+@echo off
+iverilog -o tb.o                    ^
+    common/fifo/fifo.v              ^
+    common/uart/uart_rx.v           ^
+    common/uart/uart_tx.v           ^
+    common/uart/uart_baud_clk.v     ^
+    common/uart/uart.v              ^
+    common_defs.v                   ^
+    ram/block_ram.v                 ^
+    ram/ram.v                       ^
+    cache/cache.v                   ^
+    cpu/cpu_defs.v                  ^
+    cpu/fetch/cpu_if.v              ^
+    cpu/dispatch/decoder_type_i.v   ^
+    cpu/dispatch/decoder_type_r.v   ^
+    cpu/dispatch/decoder_type_b.v   ^
+    cpu/dispatch/decoder_type_s.v   ^
+    cpu/dispatch/decoder.v          ^
+    cpu/dispatch/reg_stat.v         ^
+    cpu/dispatch/allocator.v        ^
+    cpu/execute/rs_alu.v            ^
+    cpu/execute/ex_alu.v            ^
+    cpu/execute/rs_ls.v             ^
+    cpu/execute/ex_ls.v             ^
+    cpu/execute/rs_branch.v         ^
+    cpu/execute/ex_branch.v         ^
+    testbench.v                     ^
+    riscv_top.v                     ^
+    cpu.v                           ^
+    hci.v                           

@@ -1,4 +1,3 @@
-`include "ram/block_ram.v"
 // implements 128KB of on-board RAM
 
 module ram
