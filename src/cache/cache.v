@@ -1,11 +1,10 @@
-`timescale 1ns/1ps
-
 module cache 
 #(
     parameter LINE_WIDTH  = 32,
-    parameter BLOCK_WIDTH = 8,
+    parameter BLOCK_WIDTH = 9,
+    parameter ADDR_WIDTH = 13,
     parameter BLOCK_SIZE  = 2**BLOCK_WIDTH,
-    parameter TAG_WIDTH   = 15 - BLOCK_WIDTH
+    parameter TAG_WIDTH   = ADDR_WIDTH - BLOCK_WIDTH - 2
 )
 (
     input wire clk,
@@ -51,11 +50,11 @@ wire [BLOCK_WIDTH - 1 : 0] pcx_index, pcy_index;
 reg [BLOCK_WIDTH - 1 : 0] addr_index;
 
 // Instruction fetch
-assign pcx_tag = pcx[16 : 17 - TAG_WIDTH];
-assign pcy_tag = pcy[16 : 17 - TAG_WIDTH];
+assign pcx_tag = pcx[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
+assign pcy_tag = pcy[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
 
-assign pcx_index = pcx[16 - TAG_WIDTH : 2];
-assign pcy_index = pcy[16 - TAG_WIDTH : 2];
+assign pcx_index = pcx[ADDR_WIDTH-1 - TAG_WIDTH : 2];
+assign pcy_index = pcy[ADDR_WIDTH-1 - TAG_WIDTH : 2];
 
 // load / store
 reg `byte_t mode;
@@ -72,9 +71,6 @@ reg `word_t data;
 wire `byte_t mem_data;
 assign mem_data = data_in;
  
-wire [TAG_WIDTH - 1 : 0] debug_tag;
-assign debug_tag = tag[116][0];
-
 integer i;
 always @(posedge clk) begin
     if (rst) begin
@@ -184,11 +180,11 @@ always @(negedge clk) begin
                     // Put read_data in Cache
                     if (valid[addr_index][0] == 0) begin
                         valid[addr_index][0] <= 1;
-                        tag[addr_index][0] <= addr[16 : 17 - TAG_WIDTH];
+                        tag[addr_index][0] <= addr[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
                         idata[addr_index][0] <= {data, mem_data};
                     end else begin
                         valid[addr_index][1] <= 1;
-                        tag[addr_index][1] <= addr[16 : 17 - TAG_WIDTH];
+                        tag[addr_index][1] <= addr[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
                         idata[addr_index][1] <= {data, mem_data};
                     end 
                 end else if (mode == 2'b00) begin
@@ -226,7 +222,7 @@ always @(negedge clk) begin
                     data_addr_n <= data_addr_p;
                     instx_addr_n <= `NULL_PTR; /* warning */     
                     insty_addr_n <= insty_addr_p;         
-                    addr_index <= instx_addr_p[16 - TAG_WIDTH : 2];       
+                    addr_index <= instx_addr_p[ADDR_WIDTH-1 - TAG_WIDTH : 2];       
                 end else if (insty_addr_p != `NULL_PTR) begin             
                     mode <= 2'b10;                                      
                     addr <= insty_addr_p;                                 
@@ -237,7 +233,7 @@ always @(negedge clk) begin
                     insty_addr_n <= `NULL_PTR; /* warning */ 
                     instx_addr_n <= instx_addr_p;            
                     data_addr_n <= data_addr_p; 
-                    addr_index <= insty_addr_p[16 - TAG_WIDTH : 2];       
+                    addr_index <= insty_addr_p[ADDR_WIDTH-1 - TAG_WIDTH : 2];       
                 end else begin                                          
                     mode <= 2'b11;                                      
                     addr <= `NULL_PTR;                                  
@@ -272,7 +268,7 @@ always @(negedge clk) begin
                 addr_out   <= instx_addr_p;                           
                 instx_addr_n <= `NULL_PTR; /* warning */   
                 insty_addr_n <= insty_addr_p;           
-                addr_index <= instx_addr_p[16 - TAG_WIDTH : 2];       
+                addr_index <= instx_addr_p[ADDR_WIDTH-1 - TAG_WIDTH : 2];       
             end else if (insty_addr_p != `NULL_PTR) begin             
                 mode <= 2'b10;                                      
                 addr <= insty_addr_p;                                 
@@ -282,7 +278,7 @@ always @(negedge clk) begin
                 addr_out   <= insty_addr_p;                           
                 instx_addr_n <= `NULL_PTR; /* warning */  
                 insty_addr_n <= insty_addr_p;            
-                addr_index <= insty_addr_p[16 - TAG_WIDTH : 2];       
+                addr_index <= insty_addr_p[ADDR_WIDTH-1 - TAG_WIDTH : 2];       
             end else begin                                          
                 mode <= 2'b11;                                      
                 addr <= `NULL_PTR;                                  
