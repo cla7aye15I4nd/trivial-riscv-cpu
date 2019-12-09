@@ -247,7 +247,7 @@ always @*
               d_tx_data = 8'h00;
               d_wr_en = 1'b1;
             end
-            $write("runtime : %tns", $realtime);
+            $write("runtime : %dns", $time);
             $finish;
           end
         endcase

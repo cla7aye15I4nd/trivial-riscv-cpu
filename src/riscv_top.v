@@ -1,6 +1,7 @@
 // riscv top module file
 // modification allowed for debugging purposes
 
+`timescale 1ns/1ps
 module riscv_top
 #(
 	parameter SIM = 0						// whether in simulation
