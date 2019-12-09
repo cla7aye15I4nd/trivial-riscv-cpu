@@ -111,9 +111,7 @@ always @(posedge clk) begin
     end else begin
         en <= 0;
         en_jmp <= 0;
-        data_out <= `ZERO;
         alu_busy_out <= alu_busy_in;
-        target_out <= `ZERO;
     end
 end
 

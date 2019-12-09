@@ -58,7 +58,7 @@ wire `inst_t if_inst0, if_inst1;
 wire en_jmp0, en_jmp1;
 wire `addr_t jmp_addr0, jmp_addr1;
 wire en_branch;
-wire `word_t result;
+wire `addr_t result;
 
 // IF
 cpu_if cpu_if_instance(

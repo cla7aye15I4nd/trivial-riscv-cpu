@@ -60,10 +60,8 @@ assign branch_datay_out = data_ry;
 always @(posedge clk) begin
     if (en) begin
         branch_next_busy <= 1;
-    end else if (busy) begin
-        branch_next_busy <= {tag_rx, tag_ry, tag_w} == {3{`UNLOCKED}} ? 0: 1;
     end else begin
-        branch_next_busy <= 0;
+        branch_next_busy <= {tag_rx, tag_ry, tag_w} == {3{`UNLOCKED}} ? 0: busy;
     end
 end
 

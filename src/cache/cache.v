@@ -3,9 +3,9 @@
 module cache 
 #(
     parameter LINE_WIDTH  = 32,
-    parameter BLOCK_WIDTH = 10,
-    parameter BLOCK_SIZE  = 1024,
-    parameter TAG_WIDTH   = 5
+    parameter BLOCK_WIDTH = 8,
+    parameter BLOCK_SIZE  = 2**BLOCK_WIDTH,
+    parameter TAG_WIDTH   = 15 - BLOCK_WIDTH
 )
 (
     input wire clk,
@@ -36,19 +36,19 @@ module cache
     input wire `byte_t data_in,
     output reg `byte_t data_out,
     output reg r_nw_out,
-    output reg `addr_t addr_out
+    output reg [31 : 0] addr_out
 );
 
 reg valid[0 : BLOCK_SIZE-1][0 : 1];
-reg [TAG_WIDTH - 1: 0]  tag[0 : BLOCK_SIZE-1];
+reg [TAG_WIDTH - 1: 0]  tag[0 : BLOCK_SIZE-1][0 : 1];
 reg [LINE_WIDTH - 1: 0] idata[0 : BLOCK_SIZE-1][0 : 1];
 
 reg `addr_t instx_addr_p, insty_addr_p;
 reg `addr_t instx_addr_n, insty_addr_n;
 
 wire [TAG_WIDTH - 1 : 0] pcx_tag, pcy_tag;
-wire [14 - TAG_WIDTH : 0] pcx_index, pcy_index;
-reg [14 - TAG_WIDTH : 0] addr_index;
+wire [BLOCK_WIDTH - 1 : 0] pcx_index, pcy_index;
+reg [BLOCK_WIDTH - 1 : 0] addr_index;
 
 // Instruction fetch
 assign pcx_tag = pcx[16 : 17 - TAG_WIDTH];
@@ -61,8 +61,8 @@ assign pcy_index = pcy[16 - TAG_WIDTH : 2];
 reg `byte_t mode;
 reg         data_oper;
 reg `addr_t data_addr_p, data_addr_n;
-reg `addr_t data_size;
-reg `addr_t data_data;
+reg `byte_t data_size;
+reg `word_t data_data;
 
 reg `word_t counter;
 reg `addr_t addr;
@@ -72,6 +72,9 @@ reg `word_t data;
 wire `byte_t mem_data;
 assign mem_data = data_in;
  
+wire [TAG_WIDTH - 1 : 0] debug_tag;
+assign debug_tag = tag[116][0];
+
 integer i;
 always @(posedge clk) begin
     if (rst) begin
@@ -144,7 +147,8 @@ always @(negedge clk) begin
             idata[i][1] <= 0;
             valid[i][0] <= 0; 
             valid[i][1] <= 0;
-            tag[i]      <= 0;
+            tag[i][0]   <= 0;
+            tag[i][1]   <= 0;
         end
         mode <= 2'b11;
         addr <= `NULL_PTR;

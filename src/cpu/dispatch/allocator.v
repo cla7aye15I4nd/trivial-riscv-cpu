@@ -84,111 +84,85 @@ module allocator(
     ls_en_out   <= y;           \
     branch_en_out <= z;
 
+wire `word_t new_datax, new_datay;
+wire `regtag_t new_tagx, new_tagy, new_tagw;
+assign {new_datax, new_tagx} = (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
+                               (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
+                               (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
+                                                                     {datax0_in, tagx0_in};
+assign {new_datay, new_tagy} = (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
+                               (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
+                               (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
+                                                                     {datay0_in, tagy0_in};                                                            
+assign new_tagw = (en_mw0 && tagw0_in == `ALU_MASTER) ? `UNLOCKED:
+                  (en_mw1 && tagw0_in == `ALU_SALVER) ? `UNLOCKED: 
+                  (en_mw2 && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
+                                                        tagw0_in;
+
 always @(negedge clk) begin
-    issue1 <= 1;
-    en_mod1 <= 0;
-    reg_addr1 <= 0;
-    reg_tag1 <= `UNLOCKED;
+    alu0_op_out     <= op0_in[3 : 0];
+    {alu0_datax_out, alu0_tagx_out} <= {new_datax, new_tagx};  
+    {alu0_datay_out, alu0_tagy_out} <= {new_datay, new_tagy};           
+    alu0_tagw_out   <= new_tagw;
+    alu0_addrw_out  <= addrw0_in;
+    alu0_pc_out     <= pc0_in;
+
+    alu1_op_out     <= op0_in[3 : 0];
+    {alu1_datax_out, alu1_tagx_out} <= {new_datax, new_tagx};
+    {alu1_datay_out, alu1_tagy_out} <= {new_datay, new_tagy};           
+    alu1_tagw_out  <= new_tagw;
+    alu1_addrw_out  <= addrw0_in;
+    alu1_pc_out     <= pc0_in;
+
+    ls_op_out     <= op0_in[3 : 0];
+    ls_offset_out <= imm0_in;
+    {ls_datax_out, ls_tagx_out} <= {new_datax, new_tagx};
+    {ls_datay_out, ls_tagy_out} <= {new_datay, new_tagy};
+    ls_tagw_out   <= op0_in[7 : 4] == 4'b1001 ? new_tagw: `UNLOCKED;
+    ls_addrw_out  <= addrw0_in;
+    
+    branch_op_out       <= op0_in[3 : 0];
+    branch_pc_out       <= pc0_in;
+    branch_offset_out   <= imm0_in;
+    {branch_datax_out, branch_tagx_out} <= {new_datax, new_tagx};
+    {branch_datay_out, branch_tagy_out} <= {new_datay, new_tagy};
+
+    reg_addr0 <= addrw0_in;
+
     case (op0_in[7 : 4])
     4'b0001, 4'b0010, 4'b0101, 4'b1101: begin
         if (alu0_busy_in == 0) begin
             issue0          <= 1;
-            alu0_op_out     <= op0_in[3 : 0];
-            {alu0_datax_out, alu0_tagx_out} <= (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                               (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                               (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                     {datax0_in, tagx0_in};     
-            {alu0_datay_out, alu0_tagy_out} <= (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                               (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                               (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                     {datay0_in, tagy0_in};              
-            alu0_tagw_out  <= (en_mw0 && tagw0_in == `ALU_MASTER) ? `UNLOCKED:
-                              (en_mw1 && tagw0_in == `ALU_SALVER) ? `UNLOCKED: 
-                              (en_mw2 && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
-                                                                    tagw0_in;
-            alu0_addrw_out  <= addrw0_in;
-            alu0_pc_out     <= pc0_in;
             en_mod0 <= 1;
-            reg_addr0 <= addrw0_in;
             reg_tag0 <= `ALU_MASTER;
             `SET_STATUE(1, 0, 0, 0);
         end else if (alu1_busy_in == 0) begin
             issue0          <= 1;
-            alu1_op_out     <= op0_in[3 : 0];
-            {alu1_datax_out, alu1_tagx_out} <= (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                               (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                               (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                     {datax0_in, tagx0_in};     
-            {alu1_datay_out, alu1_tagy_out} <= (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                               (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                               (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                     {datay0_in, tagy0_in};              
-            alu1_tagw_out  <= (en_mw0 && tagw0_in == `ALU_MASTER) ? `UNLOCKED:
-                              (en_mw1 && tagw0_in == `ALU_SALVER) ? `UNLOCKED: 
-                              (en_mw2 && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
-                                                                    tagw0_in;
-            alu1_addrw_out  <= addrw0_in;
-            alu1_pc_out     <= pc0_in;
             en_mod0 <= 1;
-            reg_addr0 <= addrw0_in;
             reg_tag0 <= `ALU_SALVER;
             `SET_STATUE(0, 1, 0, 0);
         end else begin
             `SET_STATUE(0, 0, 0, 0);
             issue0 <= 0;
             en_mod0 <= 0;
-            reg_addr0 <= 0;
-            reg_tag0 <= `UNLOCKED;
         end
     end
     4'b0011, 4'b1001: begin
+        reg_tag0 <= `LOAD_STORE;
         if (ls_busy_in == 0) begin
             issue0        <= 1;
-            ls_op_out     <= op0_in[3 : 0];
-            ls_offset_out <= imm0_in;
-            {ls_datax_out, ls_tagx_out} <= (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                           (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                           (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                 {datax0_in, tagx0_in};  
-            {ls_datay_out, ls_tagy_out} <= (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                           (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                           (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                 {datay0_in, tagy0_in}; 
-            ls_tagw_out   <= op0_in[7 : 4] == 4'b1001 ? ((en_mw0 && tagw0_in == `ALU_MASTER) ? `UNLOCKED:
-                                                         (en_mw1 && tagw0_in == `ALU_SALVER) ? `UNLOCKED: 
-                                                         (en_mw2 && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
-                                                                                               tagw0_in) 
-                                                      : `UNLOCKED;
-            ls_addrw_out  <= addrw0_in;
             en_mod0 <= 1;
-            reg_addr0 <= addrw0_in;
-            reg_tag0 <= `LOAD_STORE;
             `SET_STATUE(0, 0, 1, 0);
         end else begin
             `SET_STATUE(0, 0, 0, 0);
             issue0 <= 0;
             en_mod0 <= 0;
-            reg_addr0 <= 0;
-            reg_tag0 <= `UNLOCKED;
         end
     end
     4'b0100: begin 
         en_mod0 <= 0;
-        reg_addr0 <= 0;
-        reg_tag0 <= `UNLOCKED;
         if (branch_busy_in == 0) begin
-            issue0              <= 1;
-            branch_op_out       <= op0_in[3 : 0];
-            branch_pc_out       <= pc0_in;
-            branch_offset_out   <= imm0_in;
-            {branch_datax_out, branch_tagx_out} <= (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                                   (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                                   (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                         {datax0_in, tagx0_in};  
-            {branch_datay_out, branch_tagy_out} <= (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
-                                                   (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                                                   (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
-                                                                                         {datay0_in, tagy0_in};
+            issue0 <= 1;
             `SET_STATUE(0, 0, 0, 1);
         end else begin
             `SET_STATUE(0, 0, 0, 0);
@@ -199,9 +173,12 @@ always @(negedge clk) begin
         `SET_STATUE(0, 0, 0, 0);
         issue0 <= 1;
         en_mod0 <= 0;
-        reg_addr0 <= 0;
-        reg_tag0 <= `UNLOCKED;
     end
     endcase
+
+    issue1 <= 1;
+    // en_mod1 <= 0;
+    // reg_addr1 <= 0;
+    // reg_tag1 <= `UNLOCKED;
 end
 endmodule // allocator

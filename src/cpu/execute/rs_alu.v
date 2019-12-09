@@ -97,27 +97,23 @@ integer i;
 always @(posedge clk) begin
     if (en0) begin
         alu0_next_busy <=1;
-    end else if (busy[0]) begin
-        alu0_next_busy <= {tag_rx[0], tag_ry[0], tag_w[0]} == {3{`UNLOCKED}} ? 0: 1;
     end else begin
-        alu0_next_busy <= 0;
-    end
+        alu0_next_busy <= {tag_rx[0], tag_ry[0], tag_w[0]} == {3{`UNLOCKED}} ? 0: busy[0];
+    end 
 
     if (en1) begin
         alu1_next_busy <= 1;
-    end else if (busy[1]) begin
-        alu1_next_busy <= {tag_rx[1], tag_ry[1], tag_w[1]} == {3{`UNLOCKED}} ? 0: 1;
     end else begin
-        alu1_next_busy <= 0;
-    end
+        alu1_next_busy <= {tag_rx[1], tag_ry[1], tag_w[1]} == {3{`UNLOCKED}} ? 0: busy[1];
+    end 
 end
 
 always @(negedge clk) begin
     if (rst) begin
-        for (i = 0; i < `ALU_CNT; i = i + 1) begin
-            {busy[i], pc[i], op[i], data_rx[i], data_ry[i], target[i]} <= 0;
-            {tag_rx[i], tag_ry[i], tag_w[i]} <= {3{`UNLOCKED}};
-        end
+        {busy[0], pc[0], op[0], data_rx[0], data_ry[0], target[0]} <= 0;
+        {busy[1], pc[1], op[1], data_rx[1], data_ry[1], target[1]} <= 0;
+        {tag_rx[0], tag_ry[0], tag_w[0]} <= {3{`UNLOCKED}};
+        {tag_rx[1], tag_ry[1], tag_w[1]} <= {3{`UNLOCKED}};
     end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
         if (en0) begin
