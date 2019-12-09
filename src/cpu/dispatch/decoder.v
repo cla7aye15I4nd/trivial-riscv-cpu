@@ -24,8 +24,8 @@ module decoder(
     output reg `regaddr_t reg_write_addr
 );
 
-reg `inst_t pc;
-reg `addr_t inst;
+reg `addr_t pc;
+reg `inst_t inst;
 wire `oper_t op_i, op_r, op_s, op_b;
 wire `word_t imm_i, imm_s, imm_b;
 wire `regaddr_t reg_read_addrx_r, reg_read_addrx_s, reg_read_addrx_b;
@@ -90,34 +90,35 @@ always @(*) begin
     case (inst[6 : 0]) // optype
         `I_TYPE, `L_TYPE: begin
             op  = op_i;
-            imm = imm_i;
-            `SET_SIGNAL(1, 0, 1);
+            imm = imm_i;            
             reg_read_addrx = reg_read_addry_i;
             reg_read_addry = `ZERO;
             reg_write_addr = reg_write_addr_i;
+            `SET_SIGNAL(1, 0, 1);
         end
         `R_TYPE: begin
             op  = op_r;
-            `SET_SIGNAL(1, 1, 1);
+            imm = `ZERO;            
             reg_read_addrx = reg_read_addrx_r;
             reg_read_addry = reg_read_addry_r;
             reg_write_addr = reg_write_addr_r;
+            `SET_SIGNAL(1, 1, 1);
         end
         `S_TYPE: begin
             op  = op_s;
-            imm = imm_s;
-            `SET_SIGNAL(1, 1, 0);
+            imm = imm_s;            
             reg_read_addrx = reg_read_addrx_s;
             reg_read_addry = reg_read_addry_s;
             reg_write_addr = `ZERO;
+            `SET_SIGNAL(1, 1, 0);
         end
         `B_TYPE: begin
             op  = op_b;
             imm = imm_b;
-            `SET_SIGNAL(1, 1, 0);
             reg_read_addrx = reg_read_addrx_b;
             reg_read_addry = reg_read_addry_b;
             reg_write_addr = `ZERO;
+            `SET_SIGNAL(1, 1, 0);
         end
         7'b0110111: begin //LUI
             op = `OP_LUI;
@@ -153,6 +154,10 @@ always @(*) begin
         end
         default: begin
             op = `OP_NOP;
+            imm = `ZERO;
+            reg_read_addrx = `ZERO;
+            reg_read_addry = `ZERO;
+            reg_write_addr = `ZERO;
             `SET_SIGNAL(0, 0, 0);
         end
     endcase

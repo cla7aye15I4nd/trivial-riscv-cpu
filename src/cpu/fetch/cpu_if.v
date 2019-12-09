@@ -29,8 +29,8 @@ module cpu_if(
 
     // To Decoder
     input wire issue0, issue1,
-    output reg `inst_t pc0_out,
-    output reg `inst_t pc1_out,
+    output reg `addr_t pc0_out,
+    output reg `addr_t pc1_out,
     output reg hitx_out,
     output reg hity_out,
     output reg `word_t instx_out,
@@ -95,7 +95,7 @@ always @(negedge clk) begin
                         if (jmp_stall || branch_mode) begin
                             instx_out <= `OP_NOP;
                         end else begin
-                            instx_out <=  `REV(instx);
+                            instx_out <=  `REV(instx);                    
                             branch_mode <= is_branch0 ? 1: 0;
                         end
                         if (hity) begin

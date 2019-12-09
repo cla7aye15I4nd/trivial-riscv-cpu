@@ -14,7 +14,7 @@ module ex_branch(
     // to if
     // input wire `word_t predict,
     output reg en,
-    output reg `word_t dest_out,
+    output reg `addr_t dest_out,
 
     input wire clk,
     input wire rdy
