@@ -117,7 +117,6 @@ always @(negedge clk) begin
     end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
         if (en0) begin
-            alu0_next_busy <= 1;    
             busy[0] <= 1;
             op[0] <= op0;
             pc[0] <= pc0;
@@ -126,7 +125,6 @@ always @(negedge clk) begin
             `UPDATE_VAR(tag_w[0], tagw0)
             target[0] <= addrw0;
         end else begin
-            alu0_next_busy <= busy_alu0;
             busy[0] <= busy_alu0;
             `UPDATE_PAIR(tag_rx[0], data_rx[0], tag_rx[0], data_rx[0])
             `UPDATE_PAIR(tag_ry[0], data_ry[0], tag_ry[0], data_ry[0])
