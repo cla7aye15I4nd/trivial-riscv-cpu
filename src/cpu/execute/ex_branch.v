@@ -30,7 +30,7 @@ assign branch_busy_out = (
                     ) ? 0 : 1;
 
 wire `word_t jump, remain;                    
-assign jump = pc_in + offset_in;
+assign jump = pc_in + $signed(offset_in);
 assign remain = pc_in + 4;
 
 always @(posedge clk) begin

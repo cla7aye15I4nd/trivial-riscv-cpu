@@ -1,6 +1,4 @@
 module allocator(
-    input wire branch_mode,
-
     // Waiting alloc
     input wire `oper_t op0_in,
     input wire `addr_t pc0_in,
@@ -8,11 +6,11 @@ module allocator(
     input wire `regtag_t tagx0_in, tagy0_in, tagw0_in,
     input wire `regaddr_t addrw0_in,
 
-    input wire `oper_t op1_in,
-    input wire `addr_t pc1_in,
-    input wire `word_t imm1_in, datax1_in, datay1_in, 
-    input wire `regtag_t tagx1_in, tagy1_in, tagw1_in,
-    input wire `regaddr_t addrw1_in,
+    // input wire `oper_t op1_in,
+    // input wire `addr_t pc1_in,
+    // input wire `word_t imm1_in, datax1_in, datay1_in, 
+    // input wire `regtag_t tagx1_in, tagy1_in, tagw1_in,
+    // input wire `regaddr_t addrw1_in,
     
     // current alu state
     input wire alu0_busy_in,
@@ -68,14 +66,13 @@ module allocator(
     output reg `regaddr_t reg_addr0,
     output reg `regtag_t reg_tag0,
 
-    output reg en_mod1, 
-    output reg `regaddr_t reg_addr1,
-    output reg `regtag_t reg_tag1,
+    // output reg en_mod1, 
+    // output reg `regaddr_t reg_addr1,
+    // output reg `regtag_t reg_tag1,
 
-    output reg issue0, issue1,
+    output reg issue0,
     input wire clk,
-    input wire rst,
-    input wire rdy
+    input wire rst
 );
 
 `define SET_STATUE(w, x, y, z) \
@@ -175,10 +172,5 @@ always @(negedge clk) begin
         en_mod0 <= 0;
     end
     endcase
-
-    issue1 <= 1;
-    // en_mod1 <= 0;
-    // reg_addr1 <= 0;
-    // reg_tag1 <= `UNLOCKED;
 end
 endmodule // allocator

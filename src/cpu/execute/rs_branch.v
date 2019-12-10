@@ -45,7 +45,7 @@ reg `addr_t pc_s;
 reg `word_t offset;
 reg `sinst_t op_branch;
 reg `regaddr_t target;
-reg `regtag_t tag_rx, tag_ry, tag_w;
+reg `regtag_t tag_rx, tag_ry;
 reg `word_t data_rx, data_ry;
 
 assign pc_out = pc_s;
@@ -61,7 +61,7 @@ always @(posedge clk) begin
     if (en) begin
         branch_next_busy <= 1;
     end else begin
-        branch_next_busy <= {tag_rx, tag_ry, tag_w} == {3{`UNLOCKED}} ? 0: busy;
+        branch_next_busy <= {tag_rx, tag_ry} == {2{`UNLOCKED}} ? 0: busy;
     end
 end
 

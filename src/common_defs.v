@@ -6,7 +6,7 @@
 /* cpu data struct*/
 `define oper_t  [7 : 0]
 `define inst_t  [31: 0]
-`define addr_t  [18: 0]
+`define addr_t  [17: 0]
 
 /* register config */
 `define REG_COUNT       32
@@ -20,4 +20,4 @@
 
 /* constant */
 `define ZERO 32'h00000000
-`define NULL_PTR  18'b1111_1111_1111_1111_11
+`define NULL_PTR  17'b1111_1111_1111_1111_1

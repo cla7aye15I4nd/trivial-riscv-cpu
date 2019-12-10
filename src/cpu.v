@@ -64,8 +64,8 @@ wire `addr_t result;
 cpu_if cpu_if_instance(
     .clk(clk_in), .rst(rst_in), .rdy(rdy_in),
 
-    .hitx(cache_hitx), .hity(cache_hity),
-    .instx(cache_instx), .insty(cache_insty),
+    .hitx(cache_hitx), .instx(cache_instx), 
+    //.hity(cache_hity), .insty(cache_insty),
 
     .en_rx_out(cache_en_rx), .en_ry_out(cache_en_ry),
     .pcx_out(cache_pcx), .pcy_out(cache_pcy),
@@ -75,10 +75,8 @@ cpu_if cpu_if_instance(
 
     .en_branch(en_branch), .result(result),
 
-    .issue0(issue0), .issue1(issue1),
-    .pc0_out(if_pc0), .pc1_out(if_pc1),
-    .hitx_out(if_hit0), .hity_out(if_hit1),
-    .instx_out(if_inst0), .insty_out(if_inst1)
+    .pc0_out(if_pc0), .hitx_out(if_hit0), .instx_out(if_inst0), .issue0(issue0)
+    // .pc1_out(if_pc1), .hity_out(if_hit1), .insty_out(if_inst1), .issue1(issue1),
 );
 
 // Decoder output / RegStat Input
@@ -110,18 +108,18 @@ decoder decoder_master(
   .reg_write_addr(reg_write_addr0)
 );
 
-decoder decoder_salve(
-  .clk(clk_in), .rdy(rdy_in), .rst(rst_in),
-  .hit(if_hit1), .issue(issue1),
-  .pc_in(if_pc1), .inst_in(if_inst1),
+// decoder decoder_salve(
+//   .clk(clk_in), .rdy(rdy_in), .rst(rst_in),
+//   .hit(if_hit1), .issue(issue1),
+//   .pc_in(if_pc1), .inst_in(if_inst1),
 
-  .pc_out(alloc_pc1),
-  .op(op1), .imm(imm1), 
-  .en_rx(en_rx1), .en_ry(en_ry1), .en_w(en_w1),
-  .reg_read_addrx(reg_read_addrx1), 
-  .reg_read_addry(reg_read_addry1), 
-  .reg_write_addr(reg_write_addr1)
-);
+//   .pc_out(alloc_pc1),
+//   .op(op1), .imm(imm1), 
+//   .en_rx(en_rx1), .en_ry(en_ry1), .en_w(en_w1),
+//   .reg_read_addrx(reg_read_addrx1), 
+//   .reg_read_addry(reg_read_addry1), 
+//   .reg_write_addr(reg_write_addr1)
+// );
 
 // RegStat Output 
 wire `word_t read_datax0, read_datay0;
@@ -150,14 +148,15 @@ wire `word_t ls_offset_in, branch_offset_in;
 
 // RegStat
 reg_stat reg_stat_instance(
-  .imm0(imm0), .imm1(imm1),
+  .imm0(imm0),
   .en_rx0(en_rx0), .addrx0(reg_read_addrx0), .datax0(read_datax0), .tagx0(read_lockx0),
   .en_ry0(en_ry0), .addry0(reg_read_addry0), .datay0(read_datay0), .tagy0(read_locky0),
-  .en_rx1(en_rx1), .addrx1(reg_read_addrx1), .datax1(read_datax1), .tagx1(read_lockx1),
-  .en_ry1(en_ry1), .addry1(reg_read_addry1), .datay1(read_datay1), .tagy1(read_locky1),
+  // .imm1(imm1),
+  // .en_rx1(en_rx1), .addrx1(reg_read_addrx1), .datax1(read_datax1), .tagx1(read_lockx1),
+  // .en_ry1(en_ry1), .addry1(reg_read_addry1), .datay1(read_datay1), .tagy1(read_locky1),
   
   .en_rw0(en_w0), .addrw0(reg_write_addr0), .tagw0(write_lock0),
-  .en_rw1(en_w1), .addrw1(reg_write_addr1), .tagw1(write_lock1),
+  // .en_rw1(en_w1), .addrw1(reg_write_addr1), .tagw1(write_lock1),
 
   .en_w0(regs_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
   .en_w1(regs_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
@@ -194,10 +193,10 @@ allocator allocator_instance(
   .tagx0_in(read_lockx0), .tagy0_in(read_locky0), .tagw0_in(write_lock0),
   .addrw0_in(reg_write_addr0),
 
-  .op1_in(op1), .pc1_in(alloc_pc1), 
-  .imm1_in(imm1), .datax1_in(read_datax1), .datay1_in(read_datay1),
-  .tagx1_in(read_lockx1), .tagy1_in(read_locky1), .tagw1_in(write_lock1),
-  .addrw1_in(reg_write_addr1),
+  // .op1_in(op1), .pc1_in(alloc_pc1), 
+  // .imm1_in(imm1), .datax1_in(read_datax1), .datay1_in(read_datay1),
+  // .tagx1_in(read_lockx1), .tagy1_in(read_locky1), .tagw1_in(write_lock1),
+  // .addrw1_in(reg_write_addr1),
 
   .alu0_busy_in(alu0_next_busy), 
   .alu1_busy_in(alu1_next_busy), 
@@ -227,8 +226,7 @@ allocator allocator_instance(
 
   .en_mod0(mod_enw0), .reg_addr0(mod_addr0), .reg_tag0(mod_tag0),
   
-  .issue0(issue0), .issue1(issue1),
-  .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
+  .issue0(issue0), .clk(clk_in), .rst(rst_in)
 );
 
 // rs_alu

@@ -169,7 +169,7 @@ always @(posedge clk) begin
                         en <= 0;
                         en_ls   <= 1;
                         ls_oper <= `WRITE_SIGNAL;
-                        ls_addr <= ls_datax_in + offset_in;
+                        ls_addr <= ls_datax_in + $signed(offset_in);
                         ls_size <= 1;
                         ls_data <= ls_datay_in;
                         ls_busy_out <= 1;
@@ -185,7 +185,7 @@ always @(posedge clk) begin
                         en <= 0;
                         en_ls   <= 1;
                         ls_oper <= `WRITE_SIGNAL;
-                        ls_addr <= ls_datax_in + offset_in;
+                        ls_addr <= ls_datax_in + $signed(offset_in);
                         ls_size <= 2;
                         ls_data <= ls_datay_in;
                         ls_busy_out <= 1;
@@ -201,7 +201,7 @@ always @(posedge clk) begin
                         en <= 0;
                         en_ls   <= 1;
                         ls_oper <= `WRITE_SIGNAL;
-                        ls_addr <= ls_datax_in + offset_in;
+                        ls_addr <= ls_datax_in + $signed(offset_in);
                         ls_size <= 4;
                         ls_data <= ls_datay_in;
                         ls_busy_out <= 1;
