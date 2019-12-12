@@ -57,12 +57,20 @@ assign ls_datax_out = data_rx;
 assign ls_datay_out = data_ry;
 assign ls_target_out = target;
 
+reg en_s;
+reg `addr_t addrw_s;
+reg `sinst_t op_s;
+reg `regtag_t tagx_s, tagy_s, tagw_s;
+reg `word_t datax_s, datay_s, imm_s;
+
 always @(posedge clk) begin
-    if (en) begin
-        ls_next_busy <= 1;
-    end else begin
-        ls_next_busy <= busy;
-    end
+    en_s <= en;
+    op_s <= op;
+    imm_s <= imm;
+    {tagx_s, tagy_s, tagw_s} <= {tagx, tagy, tagw};
+    {datax_s, datay_s} <= {datax, datay};
+    addrw_s <= addrw;        
+    ls_next_busy <= en ? 1: busy;
 end
 
 always @(negedge clk) begin
@@ -71,14 +79,14 @@ always @(negedge clk) begin
         {tag_rx, tag_ry, tag_w} = {3{`UNLOCKED}};
     end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
-        if (en) begin
+        if (en_s) begin
             busy <= 1;
-            op_ls <= op;
-            offset_ls <= imm;
-            `UPDATE_PAIR(tag_rx, data_rx, tagx, datax)
-            `UPDATE_PAIR(tag_ry, data_ry, tagy, datay)
-            `UPDATE_VAR(tag_w, tagw)
-            target <= addrw;
+            op_ls <= op_s;
+            offset_ls <= imm_s;
+            `UPDATE_PAIR(tag_rx, data_rx, tagx_s, datax_s)
+            `UPDATE_PAIR(tag_ry, data_ry, tagy_s, datay_s)
+            `UPDATE_VAR(tag_w, tagw_s)
+            target <= addrw_s;
         end else begin
             busy <= busy_ls;
             `UPDATE_PAIR(tag_rx, data_rx, tag_rx, data_rx)

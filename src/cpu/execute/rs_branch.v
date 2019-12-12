@@ -41,14 +41,14 @@ module rs_branch(
 );
 
 reg busy;
-reg `addr_t pc_s;
+reg `addr_t pcs;
 reg `word_t offset;
 reg `sinst_t op_branch;
 reg `regaddr_t target;
 reg `regtag_t tag_rx, tag_ry;
 reg `word_t data_rx, data_ry;
 
-assign pc_out = pc_s;
+assign pc_out = pcs;
 assign branch_offset_out = offset;
 assign branch_busy_out = busy;
 assign branch_op_out = op_branch;
@@ -57,7 +57,19 @@ assign branch_tagy_out = tag_ry;
 assign branch_datax_out = data_rx;
 assign branch_datay_out = data_ry;
 
+reg en_s;
+reg `addr_t pc_s;
+reg `sinst_t op_s;
+reg `regtag_t tagx_s, tagy_s;
+reg `word_t datax_s, datay_s, imm_s;
+
 always @(posedge clk) begin
+    en_s <= en;
+    op_s <= op;
+    pc_s <= pc;
+    imm_s <= imm;
+    {tagx_s, tagy_s} <= {tagx, tagy};
+    {datax_s, datay_s} <= {datax, datay};
     if (en) begin
         branch_next_busy <= 1;
     end else begin
@@ -67,18 +79,18 @@ end
 
 always @(negedge clk) begin
     if (rst) begin
-        pc_s <= `ZERO;
+        pcs <= `ZERO;
         {busy, op_branch, offset, data_rx, data_ry} <= 0;
         {tag_rx, tag_ry} <= {`UNLOCKED, `UNLOCKED, `UNLOCKED};
     end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
-        if (en) begin
+        if (en_s) begin
             busy <= 1;
-            pc_s <= pc;
-            op_branch <= op;
-            offset <= imm;
-            `UPDATE_PAIR(tag_rx, data_rx, tagx, datax)
-            `UPDATE_PAIR(tag_ry, data_ry, tagy, datay)
+            pcs <= pc_s;
+            op_branch <= op_s;
+            offset <= imm_s;
+            `UPDATE_PAIR(tag_rx, data_rx, tagx_s, datax_s)
+            `UPDATE_PAIR(tag_ry, data_ry, tagy_s, datay_s)
         end else begin
             busy <= busy_branch;
             `UPDATE_PAIR(tag_rx, data_rx, tag_rx, data_rx)

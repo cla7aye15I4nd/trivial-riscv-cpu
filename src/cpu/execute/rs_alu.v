@@ -92,9 +92,18 @@ assign alu_datax1_out = data_rx[1];
 assign alu_datay1_out = data_ry[1];
 assign alu_target1_out = target[1];
 
-integer i;
+reg en0_s, en1_s;
+reg `sinst_t op0_s, op1_s;
+reg `addr_t pc0_s, pc1_s;
+reg `regaddr_t addrw0_s, addrw1_s;
+reg `regtag_t tagx0_s, tagy0_s, tagx1_s, tagy1_s, tagw0_s, tagw1_s;
+reg `word_t datax0_s, datay0_s, datax1_s, datay1_s;
 
 always @(posedge clk) begin
+    {en0_s, en1_s} <= {en0, en1};
+    {datax0_s, datay0_s, datax1_s, datay1_s} <= {datax0, datay0, datax1, datay1};
+    {op0_s, op1_s, pc0_s, pc1_s, addrw0_s, addrw1_s} <= {op0, op1, pc0, pc1, addrw0, addrw1};
+    {tagx0_s, tagy0_s, tagx1_s, tagy1_s, tagw0_s, tagw1_s} <= {tagx0, tagy0, tagx1, tagy1, tagw0, tagw1};
     if (en0) begin
         alu0_next_busy <=1;
     end else begin
@@ -116,14 +125,14 @@ always @(negedge clk) begin
         {tag_rx[1], tag_ry[1], tag_w[1]} <= {3{`UNLOCKED}};
     end else /*if (rdy)*/ begin
         /* Input instruction exist, update by input or origin value */
-        if (en0) begin
+        if (en0_s) begin
             busy[0] <= 1;
-            op[0] <= op0;
-            pc[0] <= pc0;
-            `UPDATE_PAIR(tag_rx[0], data_rx[0], tagx0, datax0)
-            `UPDATE_PAIR(tag_ry[0], data_ry[0], tagy0, datay0)
-            `UPDATE_VAR(tag_w[0], tagw0)
-            target[0] <= addrw0;
+            op[0] <= op0_s;
+            pc[0] <= pc0_s;
+            `UPDATE_PAIR(tag_rx[0], data_rx[0], tagx0_s, datax0_s)
+            `UPDATE_PAIR(tag_ry[0], data_ry[0], tagy0_s, datay0_s)
+            `UPDATE_VAR(tag_w[0], tagw0_s)
+            target[0] <= addrw0_s;
         end else begin
             busy[0] <= busy_alu0;
             `UPDATE_PAIR(tag_rx[0], data_rx[0], tag_rx[0], data_rx[0])
@@ -131,14 +140,14 @@ always @(negedge clk) begin
             `UPDATE_VAR(tag_w[0], tag_w[0])
         end
 
-        if (en1) begin
+        if (en1_s) begin
             busy[1] <= 1;
-            op[1] <= op1;
-            pc[1] <= pc1;
-            `UPDATE_PAIR(tag_rx[1], data_rx[1], tagx1, datax1)
-            `UPDATE_PAIR(tag_ry[1], data_ry[1], tagy1, datay1)
-            `UPDATE_VAR(tag_w[1], tagw1)
-            target[1] <= addrw1;
+            op[1] <= op1_s;
+            pc[1] <= pc1_s;
+            `UPDATE_PAIR(tag_rx[1], data_rx[1], tagx1_s, datax1_s)
+            `UPDATE_PAIR(tag_ry[1], data_ry[1], tagy1_s, datay1_s)
+            `UPDATE_VAR(tag_w[1], tagw1_s)
+            target[1] <= addrw1_s;
         end else begin
             busy[1] <= busy_alu1;
             `UPDATE_PAIR(tag_rx[1], data_rx[1], tag_rx[1], data_rx[1])
