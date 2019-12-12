@@ -81,7 +81,7 @@ always @(posedge clk) begin
         data_addr_p   <= `NULL_PTR;
         in_fifo     <= 0;
     end else begin
-        if (en_ls && ls_addr != `NULL_PTR && data_addr_n == `NULL_PTR) begin
+        if (en_ls && data_addr_n == `NULL_PTR) begin
             data_oper <= ls_oper;
             data_addr_p <= ls_addr;
             data_size <= ls_size;
@@ -92,7 +92,7 @@ always @(posedge clk) begin
             in_fifo   <= 0;
         end
 
-        if (en_rx && pcx != `NULL_PTR) begin
+        if (en_rx) begin
             if (valid0[pcx_index] && tag0[pcx_index] == pcx_tag) begin
                 hitx <= 1;
                 instx <= idata0[pcx_index];
@@ -111,7 +111,7 @@ always @(posedge clk) begin
             hitx <= 0;
         end
 
-        if (en_ry && pcy != `NULL_PTR) begin
+        if (en_ry) begin
             if (valid0[pcy_index] && tag0[pcy_index] == pcy_tag) begin
                 hity <= 1;
                 insty <= idata0[pcy_index];

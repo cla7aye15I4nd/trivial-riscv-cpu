@@ -127,6 +127,18 @@
             (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
             tag;
 
+`define UPDATE_PAIR_W(_tag, _data, tag, data)                                     \
+    {_tag, _data} = (en_alu0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
+                     (en_alu1 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
+                     (en_ls   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
+                     {tag, data};
+                     
+`define UPDATE_VAR_W(_tag, tag)                               \
+    _tag = (en_alu0 && tag == `ALU_MASTER) ? `UNLOCKED :   \
+            (en_alu1 && tag == `ALU_SALVER) ? `UNLOCKED :   \
+            (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
+            tag;
+
 `define READ_VAR_DEFINE(_en_r, _reg_read_addr, _data, _lock)\
     input wire _en_r,                                       \
     input wire `regaddr_t _reg_read_addr,                   \
