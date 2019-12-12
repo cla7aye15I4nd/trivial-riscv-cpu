@@ -140,6 +140,7 @@ always @(*) begin
             `SET_STATUE(0, 1, 0, 0);
         end else begin
             `SET_STATUE(0, 0, 0, 0);
+            reg_tag0 = 0;
             issue0 = 0;
             en_mod0 = 0;
         end
