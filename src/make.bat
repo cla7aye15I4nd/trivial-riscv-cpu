@@ -8,8 +8,8 @@ iverilog -o tb.o                    ^
     common_defs.v                   ^
     ram/block_ram.v                 ^
     ram/ram.v                       ^
-    cache/cache.v                   ^
     cpu/cpu_defs.v                  ^
+    cache/cache.v                   ^
     cpu/fetch/cpu_if.v              ^
     cpu/dispatch/decoder_type_i.v   ^
     cpu/dispatch/decoder_type_r.v   ^

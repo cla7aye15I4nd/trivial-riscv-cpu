@@ -3,7 +3,7 @@ import sys
 import shutil
 import string
 
-package = 'package' if len(sys.argv) == 1 else sys.argv[1]
+package = 'testcase1' if len(sys.argv) == 1 else sys.argv[1]
 tmp = 'tmp' if len(sys.argv) <= 2 else sys.argv[2]
 
 for f in os.listdir(package):
@@ -23,7 +23,7 @@ for f in os.listdir(package):
                 text = f.read()
             with open('test.ans') as f:
                 ans = f.read()
-            out = '\n'.join(text[:-10].split('\n')[1:])
+            out = '\n'.join(text[: text.find('runtime')].split('\n')[1:])
             if ans == out:
                 print("Accepted")
             else:
