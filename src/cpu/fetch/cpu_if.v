@@ -67,7 +67,7 @@ always @(negedge clk) begin
         branch_mode <= 0;
         jmp_stall <= 0;
         pcx <= 0;
-        pcy <= 0;
+        pcy <= 4;
         instx_out <= `OP_NOP;
     end else begin
         if (en_branch) begin
@@ -91,9 +91,9 @@ always @(negedge clk) begin
                 if (jmp_stall || branch_mode) begin
                     instx_out <= `OP_NOP;
                 end else begin
-                    instx_out <=  `REV(instx);                    
+                    instx_out <=  `REV(instx);                 
                     branch_mode <= is_branch0;
-                    jmp_stall <= is_jmp0;
+                    jmp_stall <= is_jmp0;                   
                 end
             end else begin
                 instx_out <= `OP_NOP;
