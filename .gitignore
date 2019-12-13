@@ -57,3 +57,5 @@ src/*.gtkw
 
 #Vivado
 vivado/
+test/test.data
+test/test.data
