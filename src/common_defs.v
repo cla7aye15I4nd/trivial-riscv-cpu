@@ -1,7 +1,7 @@
 /* common datatype config */
 `define byte_t  [7 : 0]
 `define half_t  [15: 0]
-`define word_t [31: 0]
+`define word_t  [31: 0]
 
 /* cpu data struct*/
 `define oper_t  [7 : 0]

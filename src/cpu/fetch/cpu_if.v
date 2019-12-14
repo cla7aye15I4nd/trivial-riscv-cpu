@@ -62,6 +62,11 @@ assign is_branch0 = hitx && instx[30 : 24] == 7'b1100011;
 
 `define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
 
+reg issue0_s;
+always @(posedge clk) begin
+    issue0_s <= issue0;
+end
+
 always @(negedge clk) begin
     if (rst || ~rdy) begin
         branch_mode <= 0;
@@ -82,7 +87,7 @@ always @(negedge clk) begin
             pcx <= jmp_addr;
             pcy <= jmp_addr + 4;
             instx_out <= `OP_NOP;
-        end else if (issue0) begin
+        end else if (issue0_s) begin
             pc0_out <= pcx;
             if (hitx) begin
                 hitx_out  <= 1;
