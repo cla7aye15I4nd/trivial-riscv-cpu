@@ -1,9 +1,10 @@
 # trivial-riscv
 
 This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, which is a course project of Computer Architecture, ACM Class @ SJTU.
-<img src="doc/img/aira.jpg" style="float:right">
 
-### Design
+
+### Design<img src="doc/img/aira.jpg" style="float:right">
+
 
 - name: AIRA(アイラ)
 - ISA: RISCV 32I
@@ -21,6 +22,7 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 
 - [ ] Replacing Policy, FIFO
 - [ ] 2-set associative Data Cache
+- [ ] Instruction dual issue
 - [ ] ROM (handle exception)
 - [ ] Branch Prediction(G-share)
 - [ ] Interactive IO
