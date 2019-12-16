@@ -36,7 +36,7 @@ module cache #(
     output reg [31 : 0] addr_out
 );
 
-reg [0 : BLOCK_SIZE-1] valid0, valid1;
+reg [0 : BLOCK_SIZE-1] valid0, valid1, queen;
 reg [TAG_WIDTH - 1: 0]  tag0[0 : BLOCK_SIZE-1];
 reg [TAG_WIDTH - 1: 0]  tag1[0 : BLOCK_SIZE-1];
 reg [LINE_WIDTH - 1: 0] idata0[0 : BLOCK_SIZE-1];
@@ -86,6 +86,7 @@ always @(posedge clk) begin
         insty <= `OP_NOP;
         valid0 <= 0;
         valid1 <= 0;
+        queen  <= 0;
         data_addr <= `NULL_PTR;
         instx_addr <= `NULL_PTR;
         insty_addr <= `NULL_PTR;
@@ -170,7 +171,7 @@ always @(posedge clk) begin
             data <= {data, data_in};
             if (cont0 == size0) begin
                 if (save0) begin
-                    if (~valid0[sindex]) begin
+                    if (~valid0[sindex] || ~queen[sindex]) begin
                         valid0[sindex] <= 1;
                         tag0[sindex] <= stag;
                         idata0[sindex] <= {data, data_in};
@@ -179,6 +180,7 @@ always @(posedge clk) begin
                         tag1[sindex] <= stag;
                         idata1[sindex] <= {data, data_in};
                     end
+                    queen[sindex] = queen[sindex] ^ 1;
                 end else begin
                     ls_data_out <= {data, data_in};      
                 end
