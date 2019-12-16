@@ -13,10 +13,12 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 
 ### Todo
 
+- [ ] Replacing Policy, FIFO
 - [ ] 2-set associative Data Cache
-- [ ] ROM(handle exception)
+- [ ] ROM (handle exception)
 - [ ] Branch Prediction(G-share)
 - [ ] Interactive IO
+- [ ] Virtual Memory(TLB)
 
 ### Reference
 
