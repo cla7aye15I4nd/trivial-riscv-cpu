@@ -2,6 +2,8 @@
 
 This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, which is a course project of Computer Architecture, ACM Class @ SJTU.
 
+> 越是强大的设计，有时可能会令人越痛苦																					
+
 
 ### Design
 
