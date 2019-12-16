@@ -3,7 +3,7 @@
 This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, which is a course project of Computer Architecture, ACM Class @ SJTU.
 
 
-### Design<img src="doc/img/aira.jpg" style="float:right">
+### Design
 
 
 - name: AIRA(アイラ)
