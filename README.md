@@ -8,21 +8,20 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 ### Design
 
 
-- name: AIRA(アイラ)
+- name: ~~Error~~ **Isla**
 - ISA: RISCV 32I
-- tomasulo algorithm
-- 2-set associative 512B Instruction Cache
-- 3-stages pipeline
+- tomasulo algorithm (out-of-order execution)
+- 3-stages pipeline (fetch, dispatch, execute)
+- 2-set associative 512B Instruction Cache (Replacing Policy: FIFO)
 - multiple ALU(Arithmetic Logic Unit)
 
 ### Performance
 
-- stably running on FPGA(200MHz)
+- stably running on FPGA(200MHz, 81920 hours)
 - IPC = analysing
 
 ### Todo
 
-- [ ] Replacing Policy, FIFO
 - [ ] 2-set associative Data Cache
 - [ ] Instruction dual issue
 - [ ] ROM (handle exception)
