@@ -8,8 +8,12 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 - tomasulo algorithm
 - 2-set associative 512B Instruction Cache
 - 3-stages pipeline
-- stably running on FPGA(200MHz)
 - multiple ALU(Arithmetic Logic Unit)
+
+### Performance
+
+- stably running on FPGA(200MHz)
+- IPC = analysing
 
 ### Todo
 
