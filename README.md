@@ -19,6 +19,7 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 
 - [ ] Replacing Policy, FIFO
 - [ ] 2-set associative Data Cache
+- [ ] Instruction dual issue
 - [ ] ROM (handle exception)
 - [ ] Branch Prediction(G-share)
 - [ ] Interactive IO
