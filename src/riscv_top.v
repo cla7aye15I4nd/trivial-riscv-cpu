@@ -8,24 +8,24 @@ module riscv_top
 )
 (
 	input wire 			EXCLK,
-	input wire [0:6]   seg,
-	input wire [0:3]   an,
 	input wire [0:15]  sw,
 	input wire			btnC, 
 	input wire         btnL, btnR,
 	input wire         btnU, btnD,
 	output wire 		Tx,
 	input wire 			Rx,
-	output wire[0:15]  led
+	output wire[0:15]  led,
+	output wire [0:6]   seg,
+	output wire [3:0]   an
 );
 
-localparam SYS_CLK_FREQ = 196875000;
+localparam SYS_CLK_FREQ = 150000000;
 localparam UART_BAUD_RATE = 115200;
 localparam RAM_ADDR_WIDTH = 17; 			// 128KiB ram, should not be modified
 
 reg rst;
 reg rst_delay;
-
+reg [63: 0] counter;
 wire clk;
 
 // assign EXCLK (or your own clock module) to clk
@@ -43,11 +43,13 @@ wire clk;
 always @(posedge clk or posedge btnC)
 begin
 	if (btnC) begin
+	    counter     <= 0;      
 		rst			<=	1'b1;
 		rst_delay	<=	1'b1;
 	end else begin
 		rst_delay	<=	1'b0;
 		rst			<=	rst_delay;
+		counter     <= counter + 1;
 	end
 end
 
@@ -149,7 +151,7 @@ wire hci_active;
 assign hci_active 	= hci_active_out & ~SIM;
 
 // indicates debug break
-assign led = hci_active;
+assign led = sw ^ {sw[1 : 15], 1'b0} ^ {1'b0, sw[0 : 14]};
 
 // pause cpu on hci active
 assign cpu_rdy		= (hci_active) ? 1'b0			 : 1'b1;
@@ -161,5 +163,49 @@ assign cpumc_din    = (hci_active) ? hci_ram_dout    : cpu_ram_dout;
 
 assign cpu_ram_din 	= (hci_io_en)  ? hci_io_dout 	 : ram_dout;
 assign hci_ram_din 	= ram_dout;
+
+reg [3: 0] an_out, LED_BCD;
+reg [6: 0] seg_out;
+
+assign an = an_out;
+assign seg = seg_out;
+
+always @(*) begin
+    case(counter[19:18])
+    2'b00: begin
+        an_out = 4'b0111; 
+        LED_BCD = (counter[40:24] / 1000) % 10;
+    end
+    2'b01: begin
+        an_out = 4'b1011;
+        LED_BCD = (counter[40:24] / 100) % 10;
+    end
+    2'b10: begin
+        an_out = 4'b1101;
+        LED_BCD = (counter[40:24] / 10) % 10;        
+    end
+    2'b11: begin
+        an_out = 4'b1110;       
+        LED_BCD = (counter[40:24]) % 10; 
+    end   
+
+    endcase
+end
+
+always @(*) begin
+    case(LED_BCD)
+    4'b0000: seg_out = 7'b0000001;  
+    4'b0001: seg_out = 7'b1001111;
+    4'b0010: seg_out = 7'b0010010;
+    4'b0011: seg_out = 7'b0000110;
+    4'b0100: seg_out = 7'b1001100;
+    4'b0101: seg_out = 7'b0100100;
+    4'b0110: seg_out = 7'b0100000;
+    4'b0111: seg_out = 7'b0001111;
+    4'b1000: seg_out = 7'b0000000;  
+    4'b1001: seg_out = 7'b0000100;
+    default: seg_out = 7'b0101010;
+    endcase
+end
 
 endmodule
