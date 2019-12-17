@@ -1,6 +1,6 @@
 module cache #(
     parameter LINE_WIDTH  = 32,
-    parameter BLOCK_WIDTH = 6,
+    parameter BLOCK_WIDTH = 7,
     parameter ADDR_WIDTH = 13,
     parameter BLOCK_SIZE  = 2**BLOCK_WIDTH,
     parameter TAG_WIDTH   = ADDR_WIDTH - BLOCK_WIDTH - 2

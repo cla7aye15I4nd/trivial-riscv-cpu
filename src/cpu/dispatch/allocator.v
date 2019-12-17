@@ -15,6 +15,7 @@ module allocator(
     // current alu state
     input wire alu0_busy_in,
     input wire alu1_busy_in,
+    input wire alu2_busy_in,
     input wire ls_busy_in,
     input wire branch_busy_in,
 
@@ -39,6 +40,16 @@ module allocator(
     output reg `word_t alu1_datay_out,
     output reg `regaddr_t alu1_addrw_out,
 
+    output reg alu2_en_out,
+    output reg `addr_t alu2_pc_out,
+    output reg `sinst_t alu2_op_out,
+    output reg `regtag_t alu2_tagx_out,
+    output reg `regtag_t alu2_tagy_out,
+    output reg `regtag_t alu2_tagw_out,
+    output reg `word_t alu2_datax_out,
+    output reg `word_t alu2_datay_out,
+    output reg `regaddr_t alu2_addrw_out,
+
     output reg ls_en_out,
     output reg `sinst_t ls_op_out,
     output reg `word_t ls_offset_out,
@@ -61,6 +72,7 @@ module allocator(
     `WRITE_VAR_DEFINE(en_mw0, reg_write_addr0, write_data0)
     `WRITE_VAR_DEFINE(en_mw1, reg_write_addr1, write_data1)
     `WRITE_VAR_DEFINE(en_mw2, reg_write_addr2, write_data2)
+    `WRITE_VAR_DEFINE(en_mw3, reg_write_addr3, write_data3)
 
     output reg en_mod0, 
     output reg `regaddr_t reg_addr0,
@@ -75,25 +87,29 @@ module allocator(
     input wire rst
 );
 
-`define SET_STATUE(w, x, y, z) \
-    alu0_en_out = w;           \
-    alu1_en_out = x;           \
-    ls_en_out   = y;           \
-    branch_en_out = z;
+`define SET_STATUE(a, b, c, d, e)   \
+    alu0_en_out = a;                \
+    alu1_en_out = b;                \
+    alu2_en_out = c;                \
+    ls_en_out   = d;                \
+    branch_en_out = e;
 
 wire `word_t new_datax, new_datay;
 wire `regtag_t new_tagx, new_tagy, new_tagw;
 assign {new_datax, new_tagx} = (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
                                (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
                                (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
+                               (en_mw3 && tagx0_in == `ALU_MISAKA) ? {write_data3, `UNLOCKED}: 
                                                                      {datax0_in, tagx0_in};
 assign {new_datay, new_tagy} = (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
                                (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
                                (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
+                               (en_mw3 && tagy0_in == `ALU_MISAKA) ? {write_data3, `UNLOCKED}: 
                                                                      {datay0_in, tagy0_in};                                                            
 assign new_tagw = (en_mw0 && tagw0_in == `ALU_MASTER) ? `UNLOCKED:
                   (en_mw1 && tagw0_in == `ALU_SALVER) ? `UNLOCKED: 
                   (en_mw2 && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
+                  (en_mw3 && tagw0_in == `ALU_MISAKA) ? `UNLOCKED: 
                                                         tagw0_in;
 
 always @(*) begin
@@ -110,6 +126,13 @@ always @(*) begin
     alu1_tagw_out  = new_tagw;
     alu1_addrw_out  = addrw0_in;
     alu1_pc_out     = pc0_in;
+
+    alu2_op_out     = op0_in[3 : 0];
+    {alu2_datax_out, alu2_tagx_out} = {new_datax, new_tagx};
+    {alu2_datay_out, alu2_tagy_out} = {new_datay, new_tagy};           
+    alu2_tagw_out  = new_tagw;
+    alu2_addrw_out  = addrw0_in;
+    alu2_pc_out     = pc0_in;
 
     ls_op_out     = op0_in[3 : 0];
     ls_offset_out = imm0_in;
@@ -137,6 +160,11 @@ always @(*) begin
             issue0          = 1;
             en_mod0 = 1;
             reg_tag0 = `ALU_SALVER;
+            `SET_STATUE(0, 1, 0, 0);
+        end else if (alu2_busy_in == 0) begin
+            issue0          = 1;
+            en_mod0 = 1;
+            reg_tag0 = `ALU_MISAKA;
             `SET_STATUE(0, 1, 0, 0);
         end else begin
             `SET_STATUE(0, 0, 0, 0);

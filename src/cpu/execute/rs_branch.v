@@ -18,6 +18,10 @@ module rs_branch(
     input wire busy_alu1,
     input wire `word_t alu_data1,
 
+    input wire en_alu2,
+    input wire busy_alu2,
+    input wire `word_t alu_data2,
+
     input wire en_ls,
     input wire busy_ls,
     input wire `word_t ls_data,

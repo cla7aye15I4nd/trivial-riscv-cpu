@@ -29,16 +29,16 @@ reg [63: 0] counter;
 wire clk;
 
 // assign EXCLK (or your own clock module) to clk
-//assign clk = EXCLK;
+assign clk = EXCLK;
 
- clk_wiz_0 clk_wiz(
- .clk_out1(clk),
- // Status and control signals
- .reset(0),
- .locked(),
- // Clock in ports
- .clk_in1(EXCLK)
- );
+//  clk_wiz_0 clk_wiz(
+//  .clk_out1(clk),
+//  // Status and control signals
+//  .reset(0),
+//  .locked(),
+//  // Clock in ports
+//  .clk_in1(EXCLK)
+//  );
 
 always @(posedge clk or posedge btnC)
 begin

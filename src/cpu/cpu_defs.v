@@ -60,7 +60,7 @@
 `define OP_NOP      8'b1111_1111
 
 /* Register tag */
-`define ALU_CNT         4
+`define ALU_CNT         3
 `define BRANCH_CNT      1
 `define LS_CNT          1
 
@@ -118,24 +118,14 @@
 `define UPDATE_PAIR(_tag, _data, tag, data)                                     \
     {_tag, _data} <= (en_alu0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
                      (en_alu1 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
+                     (en_alu2 && tag == `ALU_MISAKA) ? {`UNLOCKED, alu_data2} : \
                      (en_ls   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
                      {tag, data};
                      
 `define UPDATE_VAR(_tag, tag)                               \
     _tag <= (en_alu0 && tag == `ALU_MASTER) ? `UNLOCKED :   \
             (en_alu1 && tag == `ALU_SALVER) ? `UNLOCKED :   \
-            (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
-            tag;
-
-`define UPDATE_PAIR_W(_tag, _data, tag, data)                                     \
-    {_tag, _data} = (en_alu0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
-                     (en_alu1 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
-                     (en_ls   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
-                     {tag, data};
-                     
-`define UPDATE_VAR_W(_tag, tag)                               \
-    _tag = (en_alu0 && tag == `ALU_MASTER) ? `UNLOCKED :   \
-            (en_alu1 && tag == `ALU_SALVER) ? `UNLOCKED :   \
+            (en_alu2 && tag == `ALU_MISAKA) ? `UNLOCKED :   \
             (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
             tag;
 

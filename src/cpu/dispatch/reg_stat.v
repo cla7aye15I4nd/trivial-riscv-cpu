@@ -10,6 +10,7 @@ module reg_stat(
     `WRITE_VAR_DEFINE(en_w0, reg_write_addr0, write_data0)
     `WRITE_VAR_DEFINE(en_w1, reg_write_addr1, write_data1)
     `WRITE_VAR_DEFINE(en_w2, reg_write_addr2, write_data2)
+    `WRITE_VAR_DEFINE(en_w3, reg_write_addr3, write_data3)
 
     input wire en_mod0,
     input wire `regtag_t reg_tag0,
@@ -21,7 +22,7 @@ module reg_stat(
 );
 
 integer i;
-wire mod0, flag0, flag1, flag2;
+wire mod0, flag0, flag1, flag2, flag3;
 reg `word_t data[0 : `REG_COUNT-1];
 reg `regtag_t tag[0 : `REG_COUNT-1];
 
@@ -33,6 +34,7 @@ assign mod0 = en_mod0 && reg_addr0 > 0;
 assign flag0 = en_w0 && reg_write_addr0 > 0 && tag[reg_write_addr0] == `ALU_MASTER && (~en_mod0 || reg_write_addr0 != reg_addr0);
 assign flag1 = en_w1 && reg_write_addr1 > 0 && tag[reg_write_addr1] == `ALU_SALVER && (~en_mod0 || reg_write_addr1 != reg_addr0);
 assign flag2 = en_w2 && reg_write_addr2 > 0 && tag[reg_write_addr2] == `LOAD_STORE && (~en_mod0 || reg_write_addr2 != reg_addr0);
+assign flag3 = en_w3 && reg_write_addr3 > 0 && tag[reg_write_addr3] == `ALU_MISAKA && (~en_mod0 || reg_write_addr3 != reg_addr0);
             
 always @(posedge clk) begin
     if (rst || ~rdy) begin
@@ -46,6 +48,7 @@ always @(posedge clk) begin
         if (flag0) {data[reg_write_addr0], tag[reg_write_addr0]} <= {write_data0, `UNLOCKED};
         if (flag1) {data[reg_write_addr1], tag[reg_write_addr1]} <= {write_data1, `UNLOCKED};
         if (flag2) {data[reg_write_addr2], tag[reg_write_addr2]} <= {write_data2, `UNLOCKED};
+        if (flag3) {data[reg_write_addr3], tag[reg_write_addr3]} <= {write_data3, `UNLOCKED};
     end
 end
  
