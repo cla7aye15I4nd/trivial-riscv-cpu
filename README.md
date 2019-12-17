@@ -13,7 +13,9 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 - tomasulo algorithm (out-of-order execution)
 - 3-stages pipeline (fetch, dispatch, execute)
 - 2-set associative 512B Instruction Cache (Replacing Policy: FIFO)
+- Non-stop fetching instruction
 - multiple ALU(Arithmetic Logic Unit)
+- Segment LED timer, LED light game
 
 ### Performance
 
@@ -23,6 +25,7 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 ### Todo
 
 - [ ] 2-set associative Data Cache
+- [ ] load/store buffer
 - [ ] Instruction dual issue
 - [ ] ROM (handle exception)
 - [ ] Branch Prediction(G-share)
