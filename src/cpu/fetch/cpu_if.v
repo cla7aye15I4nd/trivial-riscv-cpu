@@ -30,6 +30,7 @@ module cpu_if(
     output reg hitx_out,
     output reg `addr_t pc0_out,    
     output reg `word_t instx_out
+
     // input wire issue1,
     // output reg hity_out,
     // output reg `addr_t pc1_out,
@@ -40,27 +41,29 @@ reg jmp_stall;
 reg branch_mode;
 reg `addr_t pcx, pcy;
 
-wire is_jmp0;
-// wire is_jmp1;
 wire en_jmp;
-wire `addr_t jmp_addr;
-
+wire is_jmp0;
 wire `word_t offset;
+wire `addr_t jmp_addr;
 
 assign en_rx_out = 1;
 assign en_ry_out = 1;
 assign pcx_out = pcx;
 assign pcy_out = pcy;
 
+`define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
+
 // JUMP
 assign en_jmp = en_jmp0 | en_jmp1;
 assign jmp_addr = en_jmp0 ? jmp_addr0: jmp_addr1;
-assign is_jmp0 = ~branch_mode && ~jmp_stall && hitx && (instx[30 : 24] == 7'b1101111 || (instx[30 : 24] == 7'b1100111 && instx[22 : 20] == 3'b000));
+
+assign is_jumpx0 = ~branch_mode && ~jmp_stall && hitx && instx[30 : 24] == 7'b1101111;
+assign is_jumpy0 = instx[30 : 24] == 7'b1100111 && instx[22 : 20] == 3'b000;
+assign offset = is_jumpx0 ? {instx[7 : 7], instx[11 : 8], instx[23 : 20], instx[12 : 12], instx[6 : 0], instx[15 : 13], 1'b0}: 4;
+assign is_jmp0 = ~branch_mode && ~jmp_stall && hitx && is_jumpy0;
 
 // BRANCH
 assign is_branch0 = hitx && instx[30 : 24] == 7'b1100011;
-
-`define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
 
 reg issue0_s;
 always @(posedge clk) begin
@@ -91,12 +94,12 @@ always @(negedge clk) begin
             pc0_out <= pcx;
             if (hitx) begin
                 hitx_out  <= 1;
-                pcx <= pcx + 4;
-                pcy <= pcy + 4;
+                pcx <= pcx + offset;
+                pcy <= pcy + offset;
                 if (jmp_stall || branch_mode) begin
                     instx_out <= `OP_NOP;
                 end else begin
-                    instx_out <=  `REV(instx);                 
+                    instx_out <= `REV(instx);                 
                     branch_mode <= is_branch0;
                     jmp_stall <= is_jmp0;                   
                 end

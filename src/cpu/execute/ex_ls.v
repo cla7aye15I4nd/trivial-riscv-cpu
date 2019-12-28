@@ -1,4 +1,6 @@
-module ex_ls(
+module ex_ls #(
+    parameter QUEEN_SIZE  = 16
+)(
     input wire `word_t offset_in,
     input wire ls_busy_in,
     input wire `sinst_t ls_op_in,
@@ -25,7 +27,8 @@ module ex_ls(
     output reg `word_t ls_data,
     
     // from cache
-    input wire in_fifo_in, finish,
+    input wire `word_t qsize,
+    input wire finish,
     input wire `word_t ls_data_in,
 
     input wire clk,
@@ -58,13 +61,8 @@ always @(posedge clk) begin
                         ls_oper <= `READ_SIGNAL;
                         ls_addr <= ls_datax_in + ls_datay_in;
                         ls_size <= 1;
-                        if (in_fifo_in || in_fifo) begin
-                            en_ls <= 0;
-                            in_fifo <= 1;
-                        end else begin 
-                            en_ls <= 1;
-                            in_fifo <= 0;          
-                        end
+                        en_ls <= ~in_fifo;
+                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
                     end
                 end
                 `LH: begin
@@ -81,13 +79,8 @@ always @(posedge clk) begin
                         ls_oper <= `READ_SIGNAL;
                         ls_addr <= ls_datax_in + ls_datay_in;
                         ls_size <= 2;
-                        if (in_fifo_in || in_fifo) begin
-                            en_ls <= 0;
-                            in_fifo <= 1;
-                        end else begin 
-                            en_ls <= 1;
-                            in_fifo <= 0;          
-                        end
+                        en_ls <= ~in_fifo;
+                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
                     end
                 end
                 `LW: begin
@@ -104,13 +97,8 @@ always @(posedge clk) begin
                         ls_oper <= `READ_SIGNAL;
                         ls_addr <= ls_datax_in + ls_datay_in;
                         ls_size <= 4;
-                        if (in_fifo_in || in_fifo) begin
-                            en_ls <= 0;
-                            in_fifo <= 1;
-                        end else begin 
-                            en_ls <= 1;
-                            in_fifo <= 0;          
-                        end
+                        en_ls <= ~in_fifo;
+                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
                     end
                 end
                 `LBU: begin
@@ -127,13 +115,8 @@ always @(posedge clk) begin
                         ls_oper <= `READ_SIGNAL;
                         ls_addr <= ls_datax_in + ls_datay_in;
                         ls_size <= 1;
-                        if (in_fifo_in || in_fifo) begin
-                            en_ls <= 0;
-                            in_fifo <= 1;
-                        end else begin 
-                            en_ls <= 1;
-                            in_fifo <= 0;          
-                        end
+                        en_ls <= ~in_fifo;
+                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
                     end
                 end
                 `LHU: begin
@@ -150,61 +133,47 @@ always @(posedge clk) begin
                         ls_oper     <= `READ_SIGNAL;
                         ls_addr     <= ls_datax_in + ls_datay_in;
                         ls_size     <= 1;
-                        if (in_fifo_in || in_fifo) begin
-                            en_ls   <= 0;
-                            in_fifo <= 1;
-                        end else begin 
-                            en_ls   <= 1;
-                            in_fifo <= 0;          
-                        end
+                        en_ls       <= ~in_fifo;
+                        in_fifo     <= qsize < QUEEN_SIZE ? 1: 0;
                     end
                 end
                 `SB: begin
-                    if (in_fifo_in) begin
+                    in_fifo <= 0;
+                    if (qsize < QUEEN_SIZE) begin
                         data_out    <= 0;
                         ls_busy_out <= 0;
-                        en          <= 0;
-                        en_ls       <= 0;
-                    end else begin
                         en <= 0;
                         en_ls   <= 1;
                         ls_oper <= `WRITE_SIGNAL;
                         ls_addr <= ls_datax_in + $signed(offset_in);
                         ls_size <= 1;
                         ls_data <= ls_datay_in;
-                        ls_busy_out <= 1;
                     end
                 end
                 `SH: begin
-                    if (in_fifo_in) begin
+                    in_fifo <= 0;
+                    if (qsize < QUEEN_SIZE) begin
                         data_out    <= 0;
                         ls_busy_out <= 0;
                         en          <= 0;
-                        en_ls       <= 0;
-                    end else begin
-                        en <= 0;
                         en_ls   <= 1;
                         ls_oper <= `WRITE_SIGNAL;
                         ls_addr <= ls_datax_in + $signed(offset_in);
                         ls_size <= 2;
                         ls_data <= ls_datay_in;
-                        ls_busy_out <= 1;
                     end
                 end
                 `SW: begin
-                    if (in_fifo_in) begin
+                    in_fifo <= 0;
+                    if (qsize < QUEEN_SIZE) begin
                         data_out    <= 0;
-                        ls_busy_out <= 0;
-                        en          <= 0;
-                        en_ls       <= 0;
-                    end else begin
+                        ls_busy_out <= 0;                    
                         en <= 0;
                         en_ls   <= 1;
                         ls_oper <= `WRITE_SIGNAL;
                         ls_addr <= ls_datax_in + $signed(offset_in);
                         ls_size <= 4;
                         ls_data <= ls_datay_in;
-                        ls_busy_out <= 1;
                     end
                 end
                 default: begin
