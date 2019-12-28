@@ -25,7 +25,7 @@ end
 initial begin
   $dumpfile("test.vcd");
   $dumpvars(0, top);
-  
+    
   #200000 $finish;
 end
 

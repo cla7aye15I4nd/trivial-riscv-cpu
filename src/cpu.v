@@ -29,11 +29,11 @@ module cpu(
 wire cache_en_rx, cache_en_ry, cache_hitx, cache_hity;
 wire `addr_t cache_pcx, cache_pcy;
 wire `word_t cache_instx, cache_insty;
-wire cahce_en_ls, cache_ls_oper, cahce_in_fifo, cahce_finish;
+wire cahce_en_ls, cache_ls_oper, cahce_finish;
 wire `addr_t cache_ls_addr;
 wire `byte_t cache_ls_size;
 wire `word_t cache_ls_data;
-wire `word_t cache_data_out;
+wire `word_t cache_data_out, cache_qsize;
 
 cache cache_instance(
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in),
@@ -43,7 +43,7 @@ cache cache_instance(
   .ls_addr(cache_ls_addr), 
   .ls_size(cache_ls_size),
   .ls_data(cache_ls_data),
-  .in_fifo(cache_in_fifo), .finish(cache_finish),
+  .qsize(cache_qsize), .finish(cache_finish),
   .ls_data_out(cache_data_out),
 
   .en_rx(cache_en_rx), .pcx(cache_pcx), .hitx(cache_hitx), .instx(cache_instx),
@@ -344,7 +344,7 @@ ex_ls ex_ls_instance(
   .ls_size(cache_ls_size),
   .ls_data(cache_ls_data), 
 
-  .in_fifo_in(cache_in_fifo), 
+  .qsize(cache_qsize), 
   .finish(cache_finish),
   .ls_data_in(cache_data_out),
 

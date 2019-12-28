@@ -93,7 +93,7 @@ always @(posedge clk) begin
             data_out <= alu_datax_in + pc_in;                                   
         end
         `JAL  : begin
-            en_jmp <= 1;
+            en_jmp <= 0;
             data_out <= pc_in + 4;
             jmp_addr <= pc_in + alu_datax_in;
         end
