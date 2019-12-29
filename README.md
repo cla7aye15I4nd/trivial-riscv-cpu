@@ -19,18 +19,16 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 
 ### Performance
 
-- stably running on FPGA(200MHz, 81920 hours)
+- stably running on FPGA (200MHz, 81920 hours)
 - IPC = analysing
 
 ### Todo
 
 - [ ] 2-set associative Data Cache
 - [ ] load/store buffer
-- [ ] Instruction dual issue
-- [ ] ROM (handle exception)
-- [ ] Branch Prediction(G-share)
+- [ ] Instruction dual issue  
+- [ ] Branch Prediction
 - [ ] Interactive IO
-- [ ] Virtual Memory(TLB)
 ### Reference
 
 - [RISC-V ISA Specification](http://riscv.org/specifications/)
