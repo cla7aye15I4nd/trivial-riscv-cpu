@@ -154,6 +154,23 @@ always @(posedge clk) begin
                     tail <= tail + 1;
                     count_del <= count_del + 1;
                 end
+            end else if (en_ls) begin
+                if (addr1 != `NULL_PTR) begin
+                    addr1 <= `NULL_PTR;
+                    addr_out <= 0;
+                    r_nw_out <= `READ_SIGNAL;
+                end else begin
+                    save1 <= 0;
+                    addr1 <= ls_addr;
+                    oper1 <= ls_oper;
+                    size1 <= ls_size;
+                    data1 <= ls_data[31 : 8];
+                    r_nw_out <= ls_oper;
+                    addr_out <= ls_addr;
+                    data_out <= ls_data[7 : 0];
+                    tail <= tail + 1;
+                    count_del <= count_del + 1;
+                end
             end else if (instx_addr != `NULL_PTR) begin
                 save1 <= 1;
                 addr1 <= instx_addr;
