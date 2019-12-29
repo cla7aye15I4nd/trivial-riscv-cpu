@@ -1,0 +1,105 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{graphicx}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+
+\CTEXsetup[format={\Large\bfseries}]{section}
+
+\begin{document}
+
+\title{AIRA RISC-V CPU Manual}
+\author{于峥 518030910437}
+\maketitle
+
+This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Verilog HDL, which is a course project of Computer Architecture, ACM Class @ SJTU.
+\section{Design \& Architecture}
+    \subsection{Environment}
+    \begin{center}
+        \begin{tabular}{c|c}
+            \hline
+            Device Name & Aira \\
+            \hline
+            ISA & RISCV 32I \\
+            \hline
+            FPGA & Basys3 \\
+            \hline
+        \end{tabular}
+    \end{center}
+    \subsection{Out-of-order Execution}
+    The main feature of the Aira RISC-V is to support out-of-order execution, some algorithm used in the 
+    Aira RISC-V are brefly introduced in the table below:
+    \begin{center}
+        \begin{tabular}{c|c}
+            \hline
+            Features & RISC-V CPU\\
+            \hline
+            Dynamic Scheduling & To\includegraphics[scale=0.1]{horse.png}sulo Algorithm \\
+            \hline
+            Piplining & 3-stages pipeline (Fetch, Dispatch, Execute)\\
+            \hline
+            Multiple FU & 2 Arithmetic/Logic Units and 1 Load/Store Unit \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \subsubsection{Details}
+    \begin{itemize}
+    \item In order to achieve fetch one instruction four cycles, every cycle the fetcher will send pc and pc+4 to the I-cache.
+    \item The fetcher receive instruction at negedge.
+    \item For JAL instruction, fetcher calculate the target address and modify pc directly.
+    \item Allocator rename register at dispatch stage.
+    \item Every EX unit has a reserved station.
+    \end{itemize}
+    \subsubsection{Design Diagram}
+
+    \begin{figure}[h]
+    \includegraphics[scale=0.32]{DesignDiagram.jpg}
+    \caption{Aira RISC-V CPU design diagram}
+    \end{figure}
+
+    \subsection{Cache}
+    \begin{center}
+        \begin{tabular}{ll}
+            \hline
+            Parameter & Data\\
+            \hline
+            Type & Instruction Cache \\
+            \hline
+            Size & 512B              \\
+            \hline
+            Set Associative & 2-way associative \\
+            \hline
+            Replacement Policy & FIFO \\
+            \hline
+        \end{tabular}
+    \end{center}
+    \subsection{Other Features}
+    Using LED light for output and debug, and segment display as timer.
+\section{Performance}
+    The highest frequency that the CPU can reach is 200MHz, here are time consuming of some test points:
+    \begin{center}
+        \begin{tabular}{cc}
+            \hline
+            testcase & time(s)\\
+            \hline
+            pi & 1.15 \\
+            \hline
+            bulgarian & 3.76 \\
+            \hline
+            hanoi & 2.78 \\
+            \hline
+            queens & 1.03 \\
+            \hline
+        \end{tabular}
+    \end{center}
+    from the waveform, we can see multiple ex unit works at same time.
+    
+\section{References}
+    \begin{itemize}
+        \item [1.] 
+        John L. Hennessy, David A. Patterson, et al. Computer Architecture: A Quantitative Approach, Fifth Edition, 2012.
+        \item [2.]
+        雷思磊. 自己动手写 CPU. 电子工业出版社, 2014.
+        \item [3.]
+        \href{http://riscv.org/specifications/}{RISC-V ISA Specification}
+    \end{itemize}
+\end{document}
