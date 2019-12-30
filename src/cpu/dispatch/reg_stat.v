@@ -45,7 +45,7 @@ always @(posedge clk) begin
         
         if (flag0) {data[reg_write_addr0], tag[reg_write_addr0]} <= {write_data0, `UNLOCKED};
         if (flag1) {data[reg_write_addr1], tag[reg_write_addr1]} <= {write_data1, `UNLOCKED};
-        if (flag2) {data[reg_write_addrM], tag[reg_write_addrM]} <= {write_dataM, `UNLOCKED};
+        if (flagM) {data[reg_write_addrM], tag[reg_write_addrM]} <= {write_dataM, `UNLOCKED};
     end
 end
  
