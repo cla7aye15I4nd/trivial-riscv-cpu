@@ -132,9 +132,9 @@ wire alloc_en_mw0, alloc_en_mw1;
 wire `regaddr_t alloc_maddr0, alloc_maddr1;
 wire `regtag_t alloc_mtag0, alloc_mtag1;
 
-wire regs_enw0, regs_enw1, regs_enw2;
-wire `regaddr_t regs_waddr0, regs_waddr1, regs_waddr2;
-wire `word_t regs_wdata0, regs_wdata1, regs_wdata2;
+wire regs_enw0, regs_enw1, regs_enwM;
+wire `regaddr_t regs_waddr0, regs_waddr1, regs_waddrM;
+wire `word_t regs_wdata0, regs_wdata1, regs_wdataM;
 
 wire alu0_busy_in, alu1_busy_in, ls_busy_in, branch_busy_in;
 wire `sinst_t alu0_op_in, alu1_op_in, ls_op_in, branch_op_in;
@@ -160,7 +160,7 @@ reg_stat reg_stat_instance(
 
   .en_w0(regs_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
   .en_w1(regs_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
-  .en_w2(regs_enw2), .reg_write_addr2(regs_waddr2), .write_data2(regs_wdata2),
+  .en_wM(regs_enwM), .reg_write_addrM(regs_waddrM), .write_dataM(regs_wdataM),
 
   .en_mod0(mod_enw0), .reg_addr0(mod_addr0), .reg_tag0(mod_tag0),
   // .en_mod1(mod_enw1), .reg_addr1(mod_addr1), .reg_tag1(mod_tag1),
@@ -222,7 +222,7 @@ allocator allocator_instance(
 
   .en_mw0(regs_enw0), .reg_write_addr0(regs_waddr0), .write_data0(regs_wdata0),
   .en_mw1(regs_enw1), .reg_write_addr1(regs_waddr1), .write_data1(regs_wdata1),
-  .en_mw2(regs_enw2), .reg_write_addr2(regs_waddr2), .write_data2(regs_wdata2),
+  .en_mwM(regs_enwM), .reg_write_addrM(regs_waddrM), .write_dataM(regs_wdataM),
 
   .en_mod0(mod_enw0), .reg_addr0(mod_addr0), .reg_tag0(mod_tag0),
   
@@ -244,7 +244,7 @@ rs_alu rs_alu_instance(
 
   .en_alu0(regs_enw0), .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
   .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
-  .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
+  .en_ls(regs_enwM), .busy_ls(ls_busy_upd), .ls_data(regs_wdataM),
 
   .alu0_next_busy(alu0_next_busy),
   .alu1_next_busy(alu1_next_busy),
@@ -270,7 +270,7 @@ rs_ls rs_ls_instance(
 
   .en_alu0(regs_enw0), .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
   .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
-  .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
+  .en_ls(regs_enwM), .busy_ls(ls_busy_upd), .ls_data(regs_wdataM),
 
   .ls_next_busy(ls_next_busy), 
   .ls_busy_out(ls_busy_in), .ls_offset_out(ls_offset_in), .ls_op_out(ls_op_in),
@@ -289,7 +289,7 @@ rs_branch rs_branch_instance(
 
   .en_alu0(regs_enw0), .busy_alu0(alu0_busy_upd), .alu_data0(regs_wdata0),
   .en_alu1(regs_enw1), .busy_alu1(alu1_busy_upd), .alu_data1(regs_wdata1),
-  .en_ls(regs_enw2), .busy_ls(ls_busy_upd), .ls_data(regs_wdata2),
+  .en_ls(regs_enwM), .busy_ls(ls_busy_upd), .ls_data(regs_wdataM),
   .busy_branch(branch_busy_upd),
 
   .pc_out(branch_pc_out), .branch_busy_out(branch_busy_in),
@@ -336,7 +336,7 @@ ex_ls ex_ls_instance(
 
   .ls_busy_out(ls_busy_upd),
 
-  .en(regs_enw2), .target_out(regs_waddr2), .data_out(regs_wdata2),
+  .en(regs_enwM), .target_out(regs_waddrM), .data_out(regs_wdataM),
 
   .en_ls(cache_en_ls), 
   .ls_oper(cache_ls_oper),

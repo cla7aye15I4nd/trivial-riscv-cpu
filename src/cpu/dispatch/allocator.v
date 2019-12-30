@@ -60,7 +60,7 @@ module allocator(
 
     `WRITE_VAR_DEFINE(en_mw0, reg_write_addr0, write_data0)
     `WRITE_VAR_DEFINE(en_mw1, reg_write_addr1, write_data1)
-    `WRITE_VAR_DEFINE(en_mw2, reg_write_addr2, write_data2)
+    `WRITE_VAR_DEFINE(en_mwM, reg_write_addrM, write_dataM)
 
     output reg en_mod0, 
     output reg `regaddr_t reg_addr0,
@@ -85,15 +85,15 @@ wire `word_t new_datax, new_datay;
 wire `regtag_t new_tagx, new_tagy, new_tagw;
 assign {new_datax, new_tagx} = (en_mw0 && tagx0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
                                (en_mw1 && tagx0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                               (en_mw2 && tagx0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
+                               (en_mwM && tagx0_in == `LOAD_STORE) ? {write_dataM, `UNLOCKED}: 
                                                                      {datax0_in, tagx0_in};
 assign {new_datay, new_tagy} = (en_mw0 && tagy0_in == `ALU_MASTER) ? {write_data0, `UNLOCKED}:
                                (en_mw1 && tagy0_in == `ALU_SALVER) ? {write_data1, `UNLOCKED}: 
-                               (en_mw2 && tagy0_in == `LOAD_STORE) ? {write_data2, `UNLOCKED}: 
+                               (en_mwM && tagy0_in == `LOAD_STORE) ? {write_dataM, `UNLOCKED}: 
                                                                      {datay0_in, tagy0_in};                                                            
 assign new_tagw = (en_mw0 && tagw0_in == `ALU_MASTER) ? `UNLOCKED:
                   (en_mw1 && tagw0_in == `ALU_SALVER) ? `UNLOCKED: 
-                  (en_mw2 && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
+                  (en_mwM && tagw0_in == `LOAD_STORE) ? `UNLOCKED: 
                                                         tagw0_in;
 
 always @(*) begin
