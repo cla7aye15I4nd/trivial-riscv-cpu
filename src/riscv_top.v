@@ -8,23 +8,23 @@ module riscv_top
 )
 (
 	input wire 			EXCLK,
-	input wire [0:15]  sw,
+	input wire [0:15]  	sw,
 	input wire			btnC, 
-	input wire         btnL, btnR,
-	input wire         btnU, btnD,
+	input wire         	btnL, btnR,
+	input wire         	btnU, btnD,
 	output wire 		Tx,
 	input wire 			Rx,
-	output wire[0:15]  led,
+	output wire[0:15]  	led,
 	output wire [0:6]   seg,
 	output wire [3:0]   an
 );
 
-localparam SYS_CLK_FREQ = 150000000;
+localparam SYS_CLK_FREQ = 200000000;
 localparam UART_BAUD_RATE = 115200;
 localparam RAM_ADDR_WIDTH = 17; 			// 128KiB ram, should not be modified
 
 reg rst;
-reg rst_delay;
+reg rst_delay;	
 reg [63: 0] counter;
 wire clk;
 
