@@ -19,6 +19,7 @@ module cache #(
     output reg finish,
     output wire `word_t qsize,
     output reg `word_t ls_data_out,
+    output reg `word_t stk_data_out,
     
     // Inst
     input wire en_rx,
@@ -81,6 +82,8 @@ assign hity1 = ivalid1[pcy_index] && itag1[pcy_index] == pcy_tag;
 
 assign qsize = count_add - count_del;
 
+`define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
+
 integer i;
 wire `word_t mem_data;
 assign mem_data = data_in;
@@ -105,11 +108,11 @@ always @(posedge clk) begin
     end else begin
         hitx <= hitx0 | hitx1;
         hity <= hity0 | hity1;
-        instx <= hitx0? idata0[pcx_index]: idata1[pcx_index];
-        insty <= hity0? idata0[pcy_index]: idata1[pcy_index];
+        instx <= hitx0? idata0[pcx_index]: hitx1 ? idata1[pcx_index]: `OP_NOP;
+        insty <= hity0? idata0[pcy_index]: hity1 ? idata1[pcy_index]: `OP_NOP;
 
-        if (~hitx0 && ~hitx1 && addr0 != pcx && addr1 != pcx && instx_addr == `NULL_PTR) instx_addr <= pcx;
-        if (~hity0 && ~hity1 && addr0 != pcy && addr1 != pcy && insty_addr == `NULL_PTR) insty_addr <= pcy;
+        if (~hitx0 && ~hitx1 && addr0[12 : 2] != pcx[12 : 2] && addr1[12 : 2] != pcx[12 : 2]) instx_addr <= pcx;
+        if (~hity0 && ~hity1 && addr0[12 : 2] != pcy[12 : 2] && addr1[12 : 2] != pcy[12 : 2]) insty_addr <= pcy;
 
         if (en_ls) begin
             data_oper[head] <= ls_oper;
