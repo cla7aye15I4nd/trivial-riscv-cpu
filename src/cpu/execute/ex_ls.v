@@ -30,7 +30,8 @@ module ex_ls #(
     input wire `word_t qsize,
     input wire finish,
     input wire `word_t ls_data_in,
-
+    input wire `word_t stk_data_in,
+    
     input wire clk,
     input wire rst,
     input wire rdy
@@ -95,7 +96,7 @@ always @(posedge clk) begin
                         en <= 0;
                         ls_busy_out <= 1;
                         ls_oper <= `READ_SIGNAL;
-                        ls_addr <= ls_datax_in + ls_datay_in;
+                        ls_addr <= ls_datax_in + ls_datay_in;                        
                         ls_size <= 4;
                         en_ls <= ~in_fifo;
                         in_fifo <= qsize < QUEEN_SIZE ? 1: 0;

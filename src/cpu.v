@@ -32,7 +32,7 @@ wire `word_t cache_instx, cache_insty;
 wire cahce_en_ls, cache_ls_oper, cahce_finish;
 wire `addr_t cache_ls_addr;
 wire `byte_t cache_ls_size;
-wire `word_t cache_ls_data;
+wire `word_t cache_ls_data, cache_stk_data;
 wire `word_t cache_data_out, cache_qsize;
 
 cache cache_instance(
@@ -45,6 +45,7 @@ cache cache_instance(
   .ls_data(cache_ls_data),
   .qsize(cache_qsize), .finish(cache_finish),
   .ls_data_out(cache_data_out),
+  .stk_data_out(cache_stk_data),
 
   .en_rx(cache_en_rx), .pcx(cache_pcx), .hitx(cache_hitx), .instx(cache_instx),
   .en_ry(cache_en_ry), .pcy(cache_pcy), .hity(cache_hity), .insty(cache_insty),
@@ -347,6 +348,7 @@ ex_ls ex_ls_instance(
   .qsize(cache_qsize), 
   .finish(cache_finish),
   .ls_data_in(cache_data_out),
+  .stk_data_in(cache_stk_data),
 
   .clk(clk_in), .rst(rst_in), .rdy(rdy_in)
 );
