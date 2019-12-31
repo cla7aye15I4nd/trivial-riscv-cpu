@@ -60,22 +60,18 @@
 `define OP_NOP      8'b1111_1111
 
 /* Register tag */
-`define ALU_CNT         4
+`define ALU_CNT         2
 `define BRANCH_CNT      1
 `define LS_CNT          1
 
-`define ALU_MASTER      3'b000
-`define ALU_SALVER      3'b001
-`define ALU_SAKURA      3'b010
-`define ALU_MISAKA      3'b011
-`define BRANCH_SEL      3'b100
-`define LOAD_STORE      3'b101
-`define FAIL            3'b111
+`define ALU_MASTER      2'b00
+`define ALU_SALVER      2'b01
+`define LOAD_STORE      2'b10
 
-`define REG_TAG_WIDTH   3     
+`define REG_TAG_WIDTH   2
 `define EXE_CNT         8
 `define regtag_t        [`REG_TAG_WIDTH - 1: 0]
-`define UNLOCKED        3'b111
+`define UNLOCKED        2'b11
 
 /* alu instruction */
 `define sinst_t     [3 : 0]
@@ -110,6 +106,8 @@
 `define SH          4'b1110
 `define SW          4'b1111
 
+`define STK         5
+`define STKSIZE     2**`STK
 /* reorder buffer */
 `define COMMON_MODE 0
 `define JUMP_MODE   1
@@ -127,17 +125,17 @@
             (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
             tag;
 
-`define UPDATE_PAIR_W(_tag, _data, tag, data)                                     \
+`define UPDATE_PAIR_W(_tag, _data, tag, data)                                  \
     {_tag, _data} = (en_alu0 && tag == `ALU_MASTER) ? {`UNLOCKED, alu_data0} : \
-                     (en_alu1 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
-                     (en_ls   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
-                     {tag, data};
+                    (en_alu1 && tag == `ALU_SALVER) ? {`UNLOCKED, alu_data1} : \
+                    (en_ls   && tag == `LOAD_STORE) ? {`UNLOCKED, ls_data}   : \
+                    {tag, data};
                      
-`define UPDATE_VAR_W(_tag, tag)                               \
-    _tag = (en_alu0 && tag == `ALU_MASTER) ? `UNLOCKED :   \
-            (en_alu1 && tag == `ALU_SALVER) ? `UNLOCKED :   \
-            (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED   : \
-            tag;
+`define UPDATE_VAR_W(_tag, tag)                         \
+    _tag = (en_alu0 && tag == `ALU_MASTER) ? `UNLOCKED: \
+        (en_alu1 && tag == `ALU_SALVER) ? `UNLOCKED:    \
+        (en_ls   && tag == `LOAD_STORE) ? `UNLOCKED:    \
+        tag;
 
 `define READ_VAR_DEFINE(_en_r, _reg_read_addr, _data, _lock)\
     input wire _en_r,                                       \
@@ -149,5 +147,7 @@
     input wire _en_w,                                           \
     input wire `regaddr_t _reg_write_addr,                      \
     input wire `word_t _write_data,
+
+`define REV(inst) {inst[7 : 0], inst[15 : 8], inst[23: 16], inst[31 : 24]}
 
 `endif
