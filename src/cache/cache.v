@@ -39,6 +39,13 @@ module cache #(
     output reg [31 : 0] addr_out
 );
 
+wire instk;
+wire [`STK - 1 : 0] line_index;
+reg `byte_t stk[0: `STKSIZE - 1];
+
+assign line_index    = ls_addr[`STK - 1 : 0];
+assign instk = ls_addr[16 : `STK] == {(17 - `STK){1'b1}};
+
 reg [0 : BLOCK_SIZE-1] ivalid0, ivalid1, irouter;
 reg [TAG_WIDTH - 1: 0]  itag0[0 : BLOCK_SIZE-1];
 reg [TAG_WIDTH - 1: 0]  itag1[0 : BLOCK_SIZE-1];
@@ -88,6 +95,25 @@ integer i;
 wire `word_t mem_data;
 assign mem_data = data_in;
 
+wire `byte_t byte0 = stk[line_index|0];
+wire `byte_t byte1 = stk[line_index|1];
+wire `byte_t byte2 = stk[line_index|2];
+wire `byte_t byte3 = stk[line_index|3];
+
+always @(*) begin
+    if (~en_ls) begin
+        stk_data_out = 0;
+    end else if (ls_size == 1) begin
+        stk_data_out = byte0;
+    end else if(ls_size == 2) begin
+        stk_data_out = {byte0, byte1};
+    end else if (ls_size == 4) begin
+        stk_data_out = {byte0, byte1, byte2, byte3};
+    end else begin
+        stk_data_out = 0;
+    end
+end 
+
 always @(posedge clk) begin
     if (rst || ~rdy) begin
         hitx <= 0;
@@ -114,13 +140,30 @@ always @(posedge clk) begin
         if (~hitx0 && ~hitx1 && addr0[12 : 2] != pcx[12 : 2] && addr1[12 : 2] != pcx[12 : 2]) instx_addr <= pcx;
         if (~hity0 && ~hity1 && addr0[12 : 2] != pcy[12 : 2] && addr1[12 : 2] != pcy[12 : 2]) insty_addr <= pcy;
 
-        if (en_ls) begin
-            data_oper[head] <= ls_oper;
-            data_addr[head] <= ls_addr;
-            data_size[head] <= ls_size;
-            data_data[head] <= ls_data;
-            head <= head + 1;
-            count_add <= count_add + 1;
+        if (en_ls) begin    
+            $display("%x", ls_addr);        
+            if (instk) begin                
+                if (ls_oper == `WRITE_SIGNAL) begin
+                    if (ls_size == 1) begin
+                        stk[line_index]   <= ls_data[7 : 0];
+                    end else if(ls_size == 2) begin
+                        stk[line_index]   <= ls_data[7 : 0];
+                        stk[line_index+1] <= ls_data[15 : 8];
+                    end else if (ls_size == 4) begin
+                        stk[line_index]   <= ls_data[7 : 0];
+                        stk[line_index+1] <= ls_data[15 : 8];
+                        stk[line_index+2] <= ls_data[23 : 16];
+                        stk[line_index+3] <= ls_data[31 : 24];
+                    end
+                end
+            end else begin
+                data_oper[head] <= ls_oper;
+                data_addr[head] <= ls_addr;
+                data_size[head] <= ls_size;
+                data_data[head] <= ls_data;
+                head <= head + 1;
+                count_add <= count_add + 1;
+            end
         end
 
         save0 <= save1;
@@ -157,7 +200,7 @@ always @(posedge clk) begin
                     tail <= tail + 1;
                     count_del <= count_del + 1;
                 end
-            end else if (en_ls) begin
+            end else if (en_ls && ~instk) begin
                 if (addr1 != `NULL_PTR) begin
                     addr1 <= `NULL_PTR;
                     addr_out <= 0;

@@ -31,11 +31,19 @@ module ex_ls #(
     input wire finish,
     input wire `word_t ls_data_in,
     input wire `word_t stk_data_in,
-    
+
     input wire clk,
     input wire rst,
     input wire rdy
 );
+
+wire rinstk, winstk;
+wire `addr_t raddr, waddr;
+
+assign raddr = ls_datax_in + ls_datay_in;
+assign waddr = ls_datax_in + $signed(offset_in);
+assign rinstk = raddr[16 : `STK] == {(17 - `STK){1'b1}};
+assign winstk = waddr[16 : `STK] == {(17 - `STK){1'b1}};
 
 reg in_fifo;
 
@@ -56,19 +64,8 @@ always @(posedge clk) begin
                         en <= 1;
                         en_ls <= 0;
                         in_fifo <= 0;
-                    end else begin
-                        en <= 0;
-                        ls_busy_out <= 1;
-                        ls_oper <= `READ_SIGNAL;
-                        ls_addr <= ls_datax_in + ls_datay_in;
-                        ls_size <= 1;
-                        en_ls <= ~in_fifo;
-                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
-                    end
-                end
-                `LH: begin
-                    if (finish && in_fifo) begin
-                        data_out    <= $signed({ls_data_in[7 : 0], ls_data_in[15 : 8]});
+                    end else if (rinstk && in_fifo) begin
+                        data_out    <= $signed(stk_data_in[7 : 0]);
                         ls_busy_out <= 0;
                         ls_addr     <= `NULL_PTR;
                         en <= 1;
@@ -79,14 +76,48 @@ always @(posedge clk) begin
                         ls_busy_out <= 1;
                         ls_oper <= `READ_SIGNAL;
                         ls_addr <= ls_datax_in + ls_datay_in;
+                        // $display("LB %h", ls_datax_in + ls_datay_in);
+                        ls_size <= 1;
+                        en_ls <= ~in_fifo;
+                        in_fifo <= (qsize < QUEEN_SIZE ? 1: 0) | rinstk;
+                    end
+                end
+                `LH: begin
+                    if (finish && in_fifo) begin
+                        data_out    <= $signed({ls_data_in[7 : 0], ls_data_in[15 : 8]});
+                        ls_busy_out <= 0;
+                        ls_addr     <= `NULL_PTR;
+                        en <= 1;
+                        en_ls <= 0;
+                        in_fifo <= 0;
+                    end else if (rinstk && in_fifo) begin
+                        data_out    <= $signed({stk_data_in[7 : 0], stk_data_in[15 : 8]});
+                        ls_busy_out <= 0;
+                        ls_addr     <= `NULL_PTR;
+                        en <= 1;
+                        en_ls <= 0;
+                        in_fifo <= 0;
+                    end else begin
+                        en <= 0;
+                        ls_busy_out <= 1;
+                        ls_oper <= `READ_SIGNAL;
+                        ls_addr <= ls_datax_in + ls_datay_in;
+                        // $display("LH %h", ls_datax_in + ls_datay_in);
                         ls_size <= 2;
                         en_ls <= ~in_fifo;
-                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
+                        in_fifo <= (qsize < QUEEN_SIZE ? 1: 0) | rinstk;
                     end
                 end
                 `LW: begin
                     if (finish && in_fifo) begin
                         data_out    <= {ls_data_in[7 : 0], ls_data_in[15 : 8], ls_data_in[23 : 16], ls_data_in[31 : 24]};
+                        ls_busy_out <= 0;
+                        ls_addr     <= `NULL_PTR;
+                        en <= 1;
+                        en_ls <= 0;
+                        in_fifo <= 0;
+                    end else if (rinstk && in_fifo) begin
+                        data_out    <= {stk_data_in[7 : 0], stk_data_in[15 : 8], stk_data_in[23 : 16], stk_data_in[31 : 24]};
                         ls_busy_out <= 0;
                         ls_addr     <= `NULL_PTR;
                         en <= 1;
@@ -99,7 +130,7 @@ always @(posedge clk) begin
                         ls_addr <= ls_datax_in + ls_datay_in;                        
                         ls_size <= 4;
                         en_ls <= ~in_fifo;
-                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
+                        in_fifo <= (qsize < QUEEN_SIZE ? 1: 0) | rinstk;
                     end
                 end
                 `LBU: begin
@@ -110,14 +141,22 @@ always @(posedge clk) begin
                         en <= 1;
                         en_ls <= 0;
                         in_fifo <= 0;
+                    end else if (rinstk && in_fifo) begin
+                        data_out    <= $unsigned(stk_data_in[7 : 0]);
+                        ls_busy_out <= 0;
+                        ls_addr     <= `NULL_PTR;
+                        en <= 1;
+                        en_ls <= 0;
+                        in_fifo <= 0;
                     end else begin
                         en <= 0;
                         ls_busy_out <= 1;
                         ls_oper <= `READ_SIGNAL;
                         ls_addr <= ls_datax_in + ls_datay_in;
+                        // $display("LBU %h", ls_datax_in + ls_datay_in);
                         ls_size <= 1;
                         en_ls <= ~in_fifo;
-                        in_fifo <= qsize < QUEEN_SIZE ? 1: 0;
+                        in_fifo <= (qsize < QUEEN_SIZE ? 1: 0) | rinstk;
                     end
                 end
                 `LHU: begin
@@ -128,19 +167,27 @@ always @(posedge clk) begin
                         en          <= 1;
                         en_ls       <= 0;
                         in_fifo     <= 0;
+                    end else if (rinstk && in_fifo) begin
+                        data_out    <= $unsigned({stk_data_in[7 : 0], stk_data_in[15 : 8]});
+                        ls_busy_out <= 0;
+                        ls_addr     <= `NULL_PTR;
+                        en <= 1;
+                        en_ls <= 0;
+                        in_fifo <= 0;
                     end else begin
                         en          <= 0;
                         ls_busy_out <= 1;
                         ls_oper     <= `READ_SIGNAL;
                         ls_addr     <= ls_datax_in + ls_datay_in;
+                        // $display("LHU %h", ls_datax_in + ls_datay_in);
                         ls_size     <= 1;
                         en_ls       <= ~in_fifo;
-                        in_fifo     <= qsize < QUEEN_SIZE ? 1: 0;
+                        in_fifo     <= (qsize < QUEEN_SIZE ? 1: 0) | rinstk;
                     end
                 end
                 `SB: begin
                     in_fifo <= 0;
-                    if (qsize < QUEEN_SIZE) begin
+                    if (qsize < QUEEN_SIZE || winstk) begin
                         data_out    <= 0;
                         ls_busy_out <= 0;
                         en <= 0;
@@ -153,7 +200,7 @@ always @(posedge clk) begin
                 end
                 `SH: begin
                     in_fifo <= 0;
-                    if (qsize < QUEEN_SIZE) begin
+                    if (qsize < QUEEN_SIZE || winstk) begin
                         data_out    <= 0;
                         ls_busy_out <= 0;
                         en          <= 0;
@@ -166,7 +213,7 @@ always @(posedge clk) begin
                 end
                 `SW: begin
                     in_fifo <= 0;
-                    if (qsize < QUEEN_SIZE) begin
+                    if (qsize < QUEEN_SIZE || winstk) begin
                         data_out    <= 0;
                         ls_busy_out <= 0;                    
                         en <= 0;

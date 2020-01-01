@@ -106,7 +106,7 @@
 `define SH          4'b1110
 `define SW          4'b1111
 
-`define STK         5
+`define STK         8
 `define STKSIZE     2**`STK
 /* reorder buffer */
 `define COMMON_MODE 0
