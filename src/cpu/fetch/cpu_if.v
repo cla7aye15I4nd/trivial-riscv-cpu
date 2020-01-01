@@ -47,7 +47,7 @@ wire `word_t offset;
 wire `addr_t jmp_addr;
 
 assign en_rx_out = 1;
-assign en_ry_out = 1;
+assign en_ry_out = 0;
 assign pcx_out = pcx;
 assign pcy_out = pcy;
 
@@ -76,35 +76,34 @@ always @(negedge clk) begin
         jmp_stall <= 0;
         pcx <= 0;
         pcy <= 4;
-        instx_out <= `OP_NOP;
+        hitx_out <= 0;
     end else begin
         if (en_branch) begin
             branch_mode <= 0;
             pc0_out <= result;
             pcx <= result;
             pcy <= result + 4;
-            instx_out <= `OP_NOP;
+            hitx_out <= 0;
         end else if (en_jmp) begin
             jmp_stall <= 0;
             pc0_out <= jmp_addr;
             pcx <= jmp_addr;
             pcy <= jmp_addr + 4;
-            instx_out <= `OP_NOP;
+            hitx_out <= 0;
         end else if (issue0_s) begin
             pc0_out <= pcx;
-            if (hitx) begin
-                hitx_out  <= 1;
+            if (hitx) begin                
                 pcx <= pcx + offset;
                 pcy <= pcy + offset;
+                instx_out <= `REV(instx);  
                 if (jmp_stall || branch_mode) begin
-                    instx_out <= `OP_NOP;
+                    hitx_out <= 0;
                 end else begin
-                    instx_out <= `REV(instx);                 
+                    hitx_out  <= 1;                    
                     branch_mode <= is_branch0;
                     jmp_stall <= is_jmp0;                   
                 end
             end else begin
-                instx_out <= `OP_NOP;
                 hitx_out <= 0;
             end
         end

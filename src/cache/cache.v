@@ -64,7 +64,7 @@ reg `word_t data , data1;
 
 wire [TAG_WIDTH - 1 : 0]   pcx_tag, pcy_tag, stag;
 wire [BLOCK_WIDTH - 1 : 0] pcx_index, pcy_index, sindex;
-wire hitx0, hitx1, hity0, hity1;
+wire hitx0, hitx1, hity0, hity1, _hitx, _hity;
 
 assign sindex = addr0[ADDR_WIDTH-1 - TAG_WIDTH : 2];
 assign stag = addr0[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
@@ -74,10 +74,16 @@ assign pcy_index = pcy[ADDR_WIDTH-1 - TAG_WIDTH : 2];
 assign pcx_tag = pcx[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
 assign pcy_tag = pcy[ADDR_WIDTH-1 : ADDR_WIDTH - TAG_WIDTH];
 
+assign _hitx = hitx0 | hitx1;
+assign _hity = hity0 | hity1;
+
 assign hitx0 = ivalid0[pcx_index] && itag0[pcx_index] == pcx_tag;
 assign hitx1 = ivalid1[pcx_index] && itag1[pcx_index] == pcx_tag;
 assign hity0 = ivalid0[pcy_index] && itag0[pcy_index] == pcy_tag;
 assign hity1 = ivalid1[pcy_index] && itag1[pcy_index] == pcy_tag;
+
+assign flagx = ~hitx0 && ~hitx1 && addr0[12 : 2] != pcx[12 : 2] && addr1[12 : 2] != pcx[12 : 2];
+assign flagy = ~hity0 && ~hity1 && addr0[12 : 2] != pcy[12 : 2] && addr1[12 : 2] != pcy[12 : 2];
 
 assign qsize = count_add - count_del;
 
@@ -103,13 +109,13 @@ always @(posedge clk) begin
         count_add <= 0;
         count_del <= 0;
     end else begin
-        hitx <= hitx0 | hitx1;
-        hity <= hity0 | hity1;
+        hitx <= _hitx;
+        hity <= _hity;
         instx <= hitx0? idata0[pcx_index]: idata1[pcx_index];
         insty <= hity0? idata0[pcy_index]: idata1[pcy_index];
 
-        if (~hitx0 && ~hitx1 && addr0 != pcx && addr1 != pcx && instx_addr == `NULL_PTR) instx_addr <= pcx;
-        if (~hity0 && ~hity1 && addr0 != pcy && addr1 != pcy && insty_addr == `NULL_PTR) insty_addr <= pcy;
+        if (flagx) instx_addr <= pcx;
+        if (flagy) insty_addr <= pcy;
 
         if (en_ls) begin
             data_oper[head] <= ls_oper;
@@ -171,7 +177,7 @@ always @(posedge clk) begin
                     tail <= tail + 1;
                     count_del <= count_del + 1;
                 end
-            end else if (instx_addr != `NULL_PTR) begin
+            end else if (instx_addr[0] != 1'b1) begin
                 save1 <= 1;
                 addr1 <= instx_addr;
                 instx_addr <= `NULL_PTR;
@@ -179,7 +185,7 @@ always @(posedge clk) begin
                 size1 <= 4;
                 r_nw_out <= `READ_SIGNAL;
                 addr_out <= instx_addr;
-            end else if (insty_addr != `NULL_PTR) begin
+            end else if (insty_addr[0] != 1'b1) begin
                 save1 <= 1;
                 addr1 <= insty_addr;
                 insty_addr <= `NULL_PTR;
