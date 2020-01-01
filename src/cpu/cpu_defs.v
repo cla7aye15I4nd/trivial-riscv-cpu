@@ -64,18 +64,14 @@
 `define BRANCH_CNT      1
 `define LS_CNT          1
 
-`define ALU_MASTER      3'b000
-`define ALU_SALVER      3'b001
-`define ALU_SAKURA      3'b010
-`define ALU_MISAKA      3'b011
-`define BRANCH_SEL      3'b100
-`define LOAD_STORE      3'b101
-`define FAIL            3'b111
+`define ALU_MASTER      2'b00
+`define ALU_SALVER      2'b01
+`define LOAD_STORE      2'b10
 
-`define REG_TAG_WIDTH   3     
-`define EXE_CNT         8
+`define REG_TAG_WIDTH   2 
+`define EXE_CNT         2
 `define regtag_t        [`REG_TAG_WIDTH - 1: 0]
-`define UNLOCKED        3'b111
+`define UNLOCKED        2'b11
 
 /* alu instruction */
 `define sinst_t     [3 : 0]

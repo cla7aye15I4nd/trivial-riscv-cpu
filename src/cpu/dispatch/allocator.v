@@ -158,7 +158,7 @@ always @(*) begin
         end
     end
     4'b0100: begin 
-        reg_tag0 = `BRANCH_SEL;
+        reg_tag0 =  `UNLOCKED;
         en_mod0 = 0;
         if (branch_busy_in == 0) begin
             issue0 = 1;
