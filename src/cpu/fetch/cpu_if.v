@@ -65,9 +65,13 @@ assign is_jmp0 = ~branch_mode && ~jmp_stall && hitx && is_jumpy0;
 // BRANCH
 assign is_branch0 = hitx && instx[30 : 24] == 7'b1100011;
 
-reg issue0_s;
+reg issue0_s, en_branch_s;
+reg `word_t result_s;
+
 always @(posedge clk) begin
     issue0_s <= issue0;
+    en_branch_s <= en_branch;
+    result_s <= result;
 end
 
 always @(negedge clk) begin
@@ -78,11 +82,11 @@ always @(negedge clk) begin
         pcy <= 4;
         hitx_out <= 0;
     end else begin
-        if (en_branch) begin
+        if (en_branch_s) begin
             branch_mode <= 0;
-            pc0_out <= result;
-            pcx <= result;
-            pcy <= result + 4;
+            pc0_out <= result_s;
+            pcx <= result_s;
+            pcy <= result_s + 4;
             hitx_out <= 0;
         end else if (en_jmp) begin
             jmp_stall <= 0;
