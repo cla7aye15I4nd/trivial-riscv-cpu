@@ -29,8 +29,9 @@ module cpu_if(
     input wire issue0,
     output reg hitx_out,
     output reg `addr_t pc0_out,    
-    output reg `word_t instx_out
+    output reg `word_t instx_out,
 
+    output reg `word_t inst_count
     // input wire issue1,
     // output reg hity_out,
     // output reg `addr_t pc1_out,
@@ -47,7 +48,7 @@ wire `word_t offset;
 wire `addr_t jmp_addr;
 
 assign en_rx_out = 1;
-assign en_ry_out = 0;
+assign en_ry_out = 1;
 assign pcx_out = pcx;
 assign pcy_out = pcy;
 
@@ -67,6 +68,7 @@ assign is_branch0 = hitx && instx[30 : 24] == 7'b1100011;
 
 reg issue0_s, en_branch_s;
 reg `word_t result_s;
+reg stall;
 
 always @(posedge clk) begin
     issue0_s <= issue0;
@@ -81,6 +83,8 @@ always @(negedge clk) begin
         pcx <= 0;
         pcy <= 4;
         hitx_out <= 0;
+        inst_count <= 0;
+        stall = 0;
     end else begin
         if (en_branch_s) begin
             branch_mode <= 0;
@@ -100,12 +104,14 @@ always @(negedge clk) begin
                 pcx <= pcx + offset;
                 pcy <= pcy + offset;
                 instx_out <= `REV(instx);  
-                if (jmp_stall || branch_mode) begin
+                if (jmp_stall || branch_mode || stall) begin
                     hitx_out <= 0;
                 end else begin
-                    hitx_out  <= 1;                    
+                    hitx_out  <= 1;
+                    inst_count <= inst_count + 1;                                         
                     branch_mode <= is_branch0;
-                    jmp_stall <= is_jmp0;                   
+                    jmp_stall <= is_jmp0;
+                    stall <= pcx == 20;
                 end
             end else begin
                 hitx_out <= 0;

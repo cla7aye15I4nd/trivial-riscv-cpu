@@ -19,7 +19,7 @@ module riscv_top
 	output wire [3:0]   an
 );
 
-localparam SYS_CLK_FREQ = 200000000;
+localparam SYS_CLK_FREQ = 170000000;
 localparam UART_BAUD_RATE = 115200;
 localparam RAM_ADDR_WIDTH = 17; 			// 128KiB ram, should not be modified
 
@@ -171,22 +171,22 @@ assign an = an_out;
 assign seg = seg_out;
 
 always @(*) begin
-    case(counter[19:18])
+    case(counter[18:17])
     2'b00: begin
         an_out = 4'b0111; 
-        LED_BCD = (counter[40:24] / 1000) % 10;
+        LED_BCD = (cpu_dbgreg_dout[31:19] / 1000) % 10;
     end
     2'b01: begin
         an_out = 4'b1011;
-        LED_BCD = (counter[40:24] / 100) % 10;
+        LED_BCD = (cpu_dbgreg_dout[31:19] / 100) % 10;
     end
     2'b10: begin
         an_out = 4'b1101;
-        LED_BCD = (counter[40:24] / 10) % 10;        
+        LED_BCD = (cpu_dbgreg_dout[31:19] / 10) % 10;        
     end
     2'b11: begin
         an_out = 4'b1110;       
-        LED_BCD = (counter[40:24]) % 10; 
+        LED_BCD = (cpu_dbgreg_dout[31:19]) % 10; 
     end   
 
     endcase

@@ -75,7 +75,9 @@ cpu_if cpu_if_instance(
 
     .en_branch(en_branch), .result(result),
 
-    .pc0_out(if_pc0), .hitx_out(if_hit0), .instx_out(if_inst0), .issue0(issue0)
+    .pc0_out(if_pc0), .hitx_out(if_hit0), .instx_out(if_inst0), .issue0(issue0),
+
+    .inst_count(dbgreg_dout)
     // .pc1_out(if_pc1), .hity_out(if_hit1), .insty_out(if_inst1), .issue1(issue1),
 );
 
