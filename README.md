@@ -16,6 +16,8 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 - Non-stop fetching instruction
 - multiple ALU(Arithmetic Logic Unit)
 - Segment LED timer, LED light game
+- Direct map Data Cache
+- Store Buffer
 
 ### Performance
 
@@ -24,8 +26,7 @@ This project is a trivial riscv cpu with tomasulo implemented in Verilog HDL, wh
 
 ### Todo
 
-- [ ] 2-set associative Data Cache
-- [ ] load/store buffer
+- [ ] Load buffer
 - [ ] Instruction dual issue  
 - [ ] Branch Prediction
 - [ ] Interactive IO
