@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
 
+
 \CTEXsetup[format={\Large\bfseries}]{section}
 
 \begin{document}
@@ -72,18 +73,20 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
             \hline
         \end{tabular}
     \end{center}
+    I write a direct-map D-cache in other branch, I deleted it because it didn't make the program faster.
     \subsection{Other Features}
     Using LED light for output and debug, and segment display as timer.
 \section{Performance}
-    The highest frequency that the CPU can reach is 200MHz, here are time consuming of some test points:
+    The highest frequency that the CPU can reach is 200MHz, but it is not always 
+    stable, so I choose 170MHz version to test, here are time consuming of some test points:
     \begin{center}
         \begin{tabular}{ccc}
             \hline
             testcase & time(s) & IPC \\
             \hline
-            pi & 1.10  & 0.377\\
+            pi & 1.10  & 0.390\\
             \hline
-            bulgarian & 0.54  & 0.604\\
+            bulgarian & 0.54  & 0.689\\
             \hline
             hanoi & 0.76  & 0.783\\
             \hline
