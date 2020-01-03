@@ -32,7 +32,7 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
             \hline
             Features & RISC-V CPU\\
             \hline
-            Dynamic Scheduling & To\includegraphics[scale=0.1]{horse.png}sulo Algorithm \\
+            Dynamic Scheduling & Tomasulo Algorithm \\
             \hline
             Piplining & 3-stages pipeline (Fetch, Dispatch, Execute)\\
             \hline
@@ -52,7 +52,7 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
     \subsubsection{Design Diagram}
 
     \begin{figure}[h]
-    \includegraphics[scale=0.32]{DesignDiagram.jpg}
+    \includegraphics[scale=0.24]{DesignDiagram.jpg}
     \caption{Aira RISC-V CPU design diagram}
     \end{figure}
 
@@ -92,6 +92,28 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
         \end{tabular}
     \end{center}
     from the waveform, we can see multiple ex unit works at same time.
+
+\section{Remarks \& Summary}
+    CPU 大作业最大的缺点就在于需要写完整个CPU才能看到最后的成果， 所以在一开始会写的很没有
+    动力，并且由于对语言，硬件本身的不熟悉，导致很容易写出不那么优秀的代码。我在写完后, LUT(Look up table) 的
+    占用量达到了 170\%, 并且wns达到了-2.8ns，所以我在保证正确性后几乎所有的时间都在研究如何减少wns，提升频率。
+
+    我wns为-2.8ns的主要原因是我使用了negedge，导致很多路径能够使用的时间只有5ns再100Mhz下，并且我在三个阶段都使用了negedge，
+    如果想完全消除negedge只能重构代码，所以我只能先把dispatch阶段的negedge消掉，并且改小了cache,
+    使其wns减少到-0.9ns左右。后来我发现最后一个阶段做的事情似乎做的太少了，于是我把保留站移到了这个阶段工作，
+    之后又精简了一些代码和信号的大小，并且把 vivado 的优化力度开到最大，终于达到了0.042ns。
+
+    之后我尝试加上了直接映射的D-Cache，不过优化效果并不明显，并且显著增加wns, 所以我没有把它并入我的最后版本。
+    最后我尝试在CPU上运行一些更复杂的程序，例如操作系统。不过我发现这是否成功并不在于CPU，
+    而在于RV32I指令集所能支持的事情很少，更多的工作可能需要花在编译操作系统上。而且我仅仅只是将浮点
+    部分运算编译成汇编代码后所需要的内存空间就达到了RAM的1/4,所以我建议以后不要将这样一个不切实际的
+    要求作为满分标准。
+
+    我最后玩了一下这个板的其他功能，例如上面的LED灯等，我认为大作业可以适当向这个方向发展，增加作业趣味性。
+
+    总的来说，我认为我的Tomasulo虽然并没有使用太多高级的特性，例如双发射等，但是我将每个部分的设计都尽量
+    精巧，让tomasulo能够有较好得频率。
+
 \section{References}
     \begin{itemize}
         \item [1.] 
@@ -103,12 +125,4 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
     \end{itemize}
 
 \newpage
-\section{Gallery}
-\subsection{heart.c}
-
-\begin{figure}[h]
-    \includegraphics[scale=0.40]{heart.png}
-    \caption{heart}
-\end{figure}
-
 \end{document}
