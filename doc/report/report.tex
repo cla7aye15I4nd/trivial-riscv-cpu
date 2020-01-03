@@ -77,22 +77,21 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
 \section{Performance}
     The highest frequency that the CPU can reach is 200MHz, here are time consuming of some test points:
     \begin{center}
-        \begin{tabular}{cc}
+        \begin{tabular}{ccc}
             \hline
-            testcase & time(s)\\
+            testcase & time(s) & IPC \\
             \hline
-            pi & 1.15 \\
+            pi & 1.10  & 0.377\\
             \hline
-            bulgarian & 3.76 \\
+            bulgarian & 0.54  & 0.604\\
             \hline
-            hanoi & 2.78 \\
+            hanoi & 0.76  & 0.783\\
             \hline
-            queens & 1.03 \\
+            queens & 0.81  & 0.779\\
             \hline
         \end{tabular}
     \end{center}
     from the waveform, we can see multiple ex unit works at same time.
-    
 \section{References}
     \begin{itemize}
         \item [1.] 
@@ -102,4 +101,14 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
         \item [3.]
         \href{http://riscv.org/specifications/}{RISC-V ISA Specification}
     \end{itemize}
+
+\newpage
+\section{Gallery}
+\subsection{heart.c}
+
+\begin{figure}[h]
+    \includegraphics[scale=0.40]{heart.png}
+    \caption{heart}
+\end{figure}
+
 \end{document}
