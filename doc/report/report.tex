@@ -58,6 +58,7 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
     \end{figure}
 
     \subsection{Cache}
+    \subsubsection{I-Cache}
     \begin{center}
         \begin{tabular}{ll}
             \hline
@@ -73,9 +74,19 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
             \hline
         \end{tabular}
     \end{center}
-    I write a direct-map D-cache in other branch, I deleted it because it didn't make the program faster.
+    \subsubsection{D-Cache}
+        A 128K direct-map D-cache in dev branch, I did not reserve it because it didn't make the program faster.
+    \subsubsection{Write Buffer(Data Fetch Queue)}
+    The Data Fetch Queue in design diagram has the function of write buffer, the queue can save 16 data addresses,
+    data in Data Fetch Queue will be flushed when memory port is free. 
+
+        Because the load instruction can not out of order execute, so the queue will not
+        save one more load address.
     \subsection{Other Features}
-    Using LED light for output and debug, and segment display as timer.
+    \subsubsection{IF Prefetch(Instruction Fetch Queue)} : 
+    The Instruction Fetch Queue saves two instruction addresses, after an instruction is fetched, CPU can
+    choose prefetched the next instruction when memory port is free. The priority of pre-fetching is the lowest.
+    \subsubsection{LED Light} : Using LED light for output and debug, and segment display as timer.
 \section{Performance}
     The highest frequency that the CPU can reach is 200MHz, but it is not always 
     stable, so I choose 170MHz version to test, here are time consuming of some test points:
@@ -84,19 +95,27 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
             \hline
             testcase & time(s) & IPC \\
             \hline
-            pi & 1.10  & 0.390\\
+            pi & 1.57  & 0.380\\
             \hline
-            bulgarian & 0.54  & 0.689\\
+            bulgarian & 1.75  & 0.352\\
             \hline
-            hanoi & 0.76  & 0.783\\
+            hanoi & 1.65  & 0.683\\
             \hline
-            queens & 0.81  & 0.779\\
+            queens & 1.50  & 0.480\\
             \hline
         \end{tabular}
     \end{center}
     from the waveform, we can see multiple ex unit works at same time.
 
 \section{Remarks \& Summary}
+    \subsection{Thinking}
+    \subsubsection{Fetch Instruction}
+    我通过每次传递两个指令的地址实现了四周期取指令，同时这样也具有指令预取的效果。
+
+    \subsubsection{Data Fetch Queue}
+    由于store指令不需要写入寄存器，所以可以延迟执行，通过实现Write Buffer让store在一个周期内完成。
+    
+    \subsection{Try Overclocking}
     CPU 大作业最大的缺点就在于需要写完整个CPU才能看到最后的成果， 所以在一开始会写的很没有
     动力，并且由于对语言，硬件本身的不熟悉，导致很容易写出不那么优秀的代码。我在写完后, LUT(Look up table) 的
     占用量达到了 170\%, 并且wns达到了-2.8ns，所以我在保证正确性后几乎所有的时间都在研究如何减少wns，提升频率。
@@ -113,9 +132,6 @@ This project is a trivial RISC-V CPU with tomasulo algorithm implemented in Veri
     要求作为满分标准。
 
     我最后玩了一下这个板的其他功能，例如上面的LED灯等，我认为大作业可以适当向这个方向发展，增加作业趣味性。
-
-    总的来说，我认为我的Tomasulo虽然并没有使用太多高级的特性，例如双发射等，但是我将每个部分的设计都尽量
-    精巧，让tomasulo能够有较好得频率。
 
 \section{References}
     \begin{itemize}
