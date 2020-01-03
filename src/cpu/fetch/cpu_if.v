@@ -60,7 +60,7 @@ assign jmp_addr = en_jmp0 ? jmp_addr0: jmp_addr1;
 
 assign is_jumpx0 = ~branch_mode && ~jmp_stall && hitx && instx[30 : 24] == 7'b1101111;
 assign is_jumpy0 = instx[30 : 24] == 7'b1100111 && instx[22 : 20] == 3'b000;
-assign offset = is_jumpx0 ? {instx[7 : 7], instx[11 : 8], instx[23 : 20], instx[12 : 12], instx[6 : 0], instx[15 : 13], 1'b0}: 4;
+assign offset = is_jumpx0 ? {instx[7 : 7], instx[11 : 8], instx[23 : 20], instx[12 : 12], instx[6 : 0], instx[15 : 14], 2'b0}: 4;
 assign is_jmp0 = ~branch_mode && ~jmp_stall && hitx && is_jumpy0;
 
 // BRANCH
@@ -102,7 +102,7 @@ always @(negedge clk) begin
             pc0_out <= pcx;
             if (hitx) begin                
                 pcx <= pcx + offset;
-                pcy <= pcy + offset;
+                pcy <= pcx + offset + 4;
                 instx_out <= `REV(instx);  
                 if (jmp_stall || branch_mode || stall) begin
                     hitx_out <= 0;
